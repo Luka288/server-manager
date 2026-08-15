@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { ServerRegistry } from '@game-server/server-manager';
-import { buildMinecraftCommand } from '@game-server/command-builder';
+import {
+  buildMinecraftCommand,
+  provisionMinecraftJar,
+} from '@game-server/command-builder';
 import { randomUUID } from 'node:crypto';
 
 export function createServerRoutes(registry: ServerRegistry) {
@@ -17,17 +20,16 @@ export function createServerRoutes(registry: ServerRegistry) {
     res.json(servers);
   });
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const uuid = randomUUID();
 
-    const { name, memoryMb, jarFile } = req.body;
+    const { name, memoryMb, jarFile, version } = req.body;
 
     const serverDirectory = `./servers/${uuid}`;
-    console.log(serverDirectory);
 
     const command = buildMinecraftCommand({
       memoryMb: memoryMb,
-      jarFile: jarFile,
+      jarFile: jarFile ?? 'server.jar',
       serverDirectory: serverDirectory,
     });
 
@@ -44,6 +46,19 @@ export function createServerRoutes(registry: ServerRegistry) {
     server.on('exit', (code) => {
       console.log(`[${uuid}] [exit]: process exited with code ${code}`);
     });
+
+    if (version) {
+      try {
+        await provisionMinecraftJar(version, `${serverDirectory}/server.jar`);
+        server.markStatus('stopped');
+        console.log(`[${uuid}] jar provisioned successfully`);
+      } catch (err) {
+        server.markStatus('crashed');
+        console.error(
+          `[${uuid}] provisioning failed: ${(err as Error).message}`,
+        );
+      }
+    }
 
     res.json({
       id: uuid,

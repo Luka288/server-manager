@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { ServerManagerOptions, ServerStatus } from './types';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 
 /* ServerManager class extends to the EventEmitter because whenever
    something changes it will automatically fire event
@@ -35,6 +35,9 @@ export class ServerManager extends EventEmitter {
 
     // server file creation must be set at the desktop or custom location where to user wants
     mkdirSync(this.serverManagerOptions.cwd, { recursive: true });
+
+    // automatically sets minecraft server eula to true
+    writeFileSync(`${this.serverManagerOptions.cwd}/eula.txt`, 'eula=true');
 
     this.childProcess = spawn(
       this.serverManagerOptions.command,
@@ -101,5 +104,10 @@ export class ServerManager extends EventEmitter {
 
   getStatus(): ServerStatus {
     return this.serverStatus;
+  }
+
+  // single public method that allows to updated status outside from the class
+  markStatus(status: ServerStatus): void {
+    this.setStatus(status);
   }
 }

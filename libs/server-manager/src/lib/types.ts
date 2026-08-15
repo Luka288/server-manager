@@ -3,7 +3,8 @@ export type ServerStatus =
   | 'running'
   | 'stopping'
   | 'starting'
-  | 'crashed';
+  | 'crashed'
+  | 'provisioning';
 
 export interface ServerManagerOptions {
   command: string;
