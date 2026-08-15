@@ -1,6 +1,7 @@
 import { spawn, ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { ServerManagerOptions, ServerStatus } from './types';
+import { mkdirSync } from 'node:fs';
 
 /* ServerManager class extends to the EventEmitter because whenever
    something changes it will automatically fire event
@@ -31,6 +32,9 @@ export class ServerManager extends EventEmitter {
     }
 
     this.setStatus('starting');
+
+    // server file creation must be set at the desktop or custom location where to user wants
+    mkdirSync(this.serverManagerOptions.cwd, { recursive: true });
 
     this.childProcess = spawn(
       this.serverManagerOptions.command,
