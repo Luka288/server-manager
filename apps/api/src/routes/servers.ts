@@ -5,6 +5,7 @@ import {
   provisionMinecraftJar,
 } from '@game-server/command-builder';
 import { randomUUID } from 'node:crypto';
+import { db, servers as serversTable } from '@game-server/database';
 
 export function createServerRoutes(registry: ServerRegistry) {
   const router = Router();
@@ -21,6 +22,7 @@ export function createServerRoutes(registry: ServerRegistry) {
     res.json(servers);
   });
 
+  // server creation endpoint
   router.post('/', async (req, res) => {
     const uuid = randomUUID();
 
@@ -32,6 +34,7 @@ export function createServerRoutes(registry: ServerRegistry) {
       memoryMb: memoryMb,
       jarFile: jarFile ?? 'server.jar',
       serverDirectory: serverDirectory,
+      name: name,
     });
 
     const server = registry.create(uuid, { ...command, name });
@@ -60,6 +63,16 @@ export function createServerRoutes(registry: ServerRegistry) {
         );
       }
     }
+
+    await db.insert(serversTable).values({
+      id: uuid,
+      name: name,
+      memoryMb: memoryMb,
+      jarFile: jarFile ?? 'server.jar',
+      serverDirectory: serverDirectory,
+      version: version ?? null,
+      status: server.getStatus(),
+    });
 
     res.json({
       id: uuid,

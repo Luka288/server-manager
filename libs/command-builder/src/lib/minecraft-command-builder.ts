@@ -1,5 +1,8 @@
 import { MinecraftServerConfig } from './types';
-import { ServerManagerOptions } from '@game-server/server-manager';
+import {
+  ServerManager,
+  ServerManagerOptions,
+} from '@game-server/server-manager';
 
 export function buildMinecraftCommand(
   config: MinecraftServerConfig,
@@ -11,5 +14,6 @@ export function buildMinecraftCommand(
     command: 'java', // for minecraft it will be java every time
     args: [xmx, xms, '-jar', config.jarFile, 'nogui'],
     cwd: config.serverDirectory,
+    name: config.name,
   };
 }
