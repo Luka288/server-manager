@@ -10,6 +10,7 @@ export interface ServerManagerOptions {
   command: string;
   args: string[];
   cwd: string;
+  name: string;
 }
 
 export interface ServerManagerEvents {

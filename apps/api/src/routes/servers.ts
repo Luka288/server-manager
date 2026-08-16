@@ -14,6 +14,7 @@ export function createServerRoutes(registry: ServerRegistry) {
 
     const servers = Array.from(managers.entries()).map(([id, manager]) => ({
       id,
+      name: manager.getName(),
       status: manager.getStatus(),
     }));
 
@@ -33,7 +34,7 @@ export function createServerRoutes(registry: ServerRegistry) {
       serverDirectory: serverDirectory,
     });
 
-    const server = registry.create(uuid, command);
+    const server = registry.create(uuid, { ...command, name });
 
     server.on('stdout', (chunk) => {
       console.log(`[${uuid}] [stdout]: ${chunk}`);
@@ -135,6 +136,22 @@ export function createServerRoutes(registry: ServerRegistry) {
       const errCode = errMsg.includes('not found') ? 404 : 409;
 
       res.status(errCode).json({ error: errMsg });
+    }
+  });
+
+  router.get('/:id', async (req, res) => {
+    try {
+      const serverId = req.params.id;
+
+      const server = registry.get(serverId);
+
+      res.json({
+        id: serverId,
+        name: server.getName(),
+        status: server.getStatus(),
+      });
+    } catch (error) {
+      res.status(404).json({ success: false, error: 'server not found' });
     }
   });
 

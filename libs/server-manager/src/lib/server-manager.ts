@@ -106,6 +106,10 @@ export class ServerManager extends EventEmitter {
     return this.serverStatus;
   }
 
+  getName(): string {
+    return this.serverManagerOptions.name;
+  }
+
   // single public method that allows to updated status outside from the class
   markStatus(status: ServerStatus): void {
     this.setStatus(status);
