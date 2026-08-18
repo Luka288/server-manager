@@ -15,9 +15,13 @@
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@game-server/server-manager": ["./libs/server-manager/src/index.ts"],
-      "@game-server/command-builder": ["./libs/command-builder/src/index.ts"],
-      "@game-server/database": ["./libs/database/src/index.ts"]
+      "@game-server/server-manager": [
+        "./libs/server/server-manager/src/index.ts"
+      ],
+      "@game-server/command-builder": [
+        "./libs/server/command-builder/src/index.ts"
+      ],
+      "@game-server/database": ["./libs/server/database/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

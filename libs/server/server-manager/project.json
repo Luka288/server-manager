@@ -1,0 +1,20 @@
+{
+  "name": "server-manager",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/server-manager/src",
+  "projectType": "library",
+  "tags": ["scope:server", "type:util"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/server-manager",
+        "tsConfig": "libs/server/server-manager/tsconfig.lib.json",
+        "packageJson": "libs/server/server-manager/package.json",
+        "main": "libs/server/server-manager/src/index.ts",
+        "assets": ["libs/server/server-manager/*.md"]
+      }
+    }
+  }
+}

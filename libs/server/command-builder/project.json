@@ -1,0 +1,19 @@
+{
+  "name": "command-builder",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/command-builder/src",
+  "projectType": "library",
+  "tags": ["scope:server", "type:util"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/command-builder",
+        "main": "libs/server/command-builder/src/index.ts",
+        "tsConfig": "libs/server/command-builder/tsconfig.lib.json",
+        "assets": ["libs/server/command-builder/*.md"]
+      }
+    }
+  }
+}
