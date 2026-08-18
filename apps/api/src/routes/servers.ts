@@ -3,9 +3,13 @@ import { ServerRegistry } from '@game-server/server-manager';
 import {
   buildMinecraftCommand,
   provisionMinecraftJar,
+  writeServerProperties,
 } from '@game-server/command-builder';
 import { randomUUID } from 'node:crypto';
 import { db, servers as serversTable } from '@game-server/database';
+import { eq } from 'drizzle-orm';
+import { getPublicIp, getServerPort } from '../lib/public-ip';
+import { existsSync } from 'node:fs';
 
 export function createServerRoutes(registry: ServerRegistry) {
   const router = Router();
@@ -26,7 +30,19 @@ export function createServerRoutes(registry: ServerRegistry) {
   router.post('/', async (req, res) => {
     const uuid = randomUUID();
 
-    const { name, memoryMb, jarFile, version } = req.body;
+    const {
+      name,
+      memoryMb,
+      jarFile,
+      version,
+      gamemode,
+      difficulty,
+      maxPlayers,
+      pvp,
+      whitelist,
+      onlineMode,
+      worldSeed,
+    } = req.body;
 
     const serverDirectory = `./servers/${uuid}`;
 
@@ -35,6 +51,16 @@ export function createServerRoutes(registry: ServerRegistry) {
       jarFile: jarFile ?? 'server.jar',
       serverDirectory: serverDirectory,
       name: name,
+    });
+
+    writeServerProperties(serverDirectory, {
+      gamemode,
+      difficulty,
+      maxPlayers,
+      pvp,
+      whitelist,
+      onlineMode,
+      worldSeed,
     });
 
     const server = registry.create(uuid, { ...command, name });
@@ -81,13 +107,33 @@ export function createServerRoutes(registry: ServerRegistry) {
     });
   });
 
-  router.post('/:id/start', (req, res) => {
+  router.post('/:id/start', async (req, res) => {
     const server_id = req.params.id;
 
     try {
       const currentServer = registry.get(server_id);
 
+      const [row] = await db
+        .select()
+        .from(serversTable)
+        .where(eq(serversTable.id, server_id));
+
+      if (row.initialized && !existsSync(row.serverDirectory)) {
+        res.status(409).json({
+          error: 'Server folder is missing. It may have been moved or deleted.',
+          code: 'FOLDER_MISSING',
+        });
+        return;
+      }
+
       currentServer.start();
+
+      if (!row.initialized) {
+        await db
+          .update(serversTable)
+          .set({ initialized: true })
+          .where(eq(serversTable.id, server_id));
+      }
 
       res.json({
         id: server_id,
@@ -157,14 +203,45 @@ export function createServerRoutes(registry: ServerRegistry) {
       const serverId = req.params.id;
 
       const server = registry.get(serverId);
+      const publicIp = await getPublicIp();
+      const port = getServerPort(`./servers/${serverId}`);
+
+      const serverDirectory = `./servers/${serverId}`;
 
       res.json({
         id: serverId,
         name: server.getName(),
         status: server.getStatus(),
+        ip: publicIp,
+        port: getServerPort(serverDirectory),
+        connectAddress: `${publicIp}:${port}`,
+        note: 'Share this address with friends. If they cannot connect, you may need to enable port forwarding for this port on your router.',
       });
     } catch (error) {
       res.status(404).json({ success: false, error: 'server not found' });
+    }
+  });
+
+  router.delete('/:id/delete', async (req, res) => {
+    const serverId = req.params.id;
+
+    try {
+      const currentServer = registry.get(serverId);
+
+      if (currentServer.getStatus() === 'running') {
+        res
+          .status(403)
+          .json({ success: false, error: 'Cannot remove running server' });
+
+        return;
+      }
+
+      registry.delete(serverId);
+
+      await db.delete(serversTable).where(eq(serversTable.id, serverId));
+      res.json({ id: serverId, deleted: true });
+    } catch (error) {
+      res.status(404).json({ error: 'Server not found' });
     }
   });
 

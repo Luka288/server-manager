@@ -1,4 +1,4 @@
-import { pgTable, text, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, boolean } from 'drizzle-orm/pg-core';
 
 export const servers = pgTable('servers', {
   id: text('id').primaryKey(),
@@ -8,4 +8,5 @@ export const servers = pgTable('servers', {
   serverDirectory: text('server_directory').notNull(),
   version: text('version'),
   status: text('status').notNull(),
+  initialized: boolean('initialized').notNull().default(false),
 });

@@ -4,3 +4,14 @@ export interface MinecraftServerConfig {
   serverDirectory: string;
   name: string;
 }
+
+export interface MinecraftServerProperties {
+  gamemode?: 'survival' | 'creative' | 'adventure' | 'spectator';
+  difficulty?: 'peaceful' | 'easy' | 'normal' | 'hard';
+  maxPlayers?: number;
+  pvp?: boolean;
+  whitelist?: boolean;
+  onlineMode?: boolean;
+  serverPort?: number;
+  worldSeed?: string;
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "servers" ADD COLUMN "initialized" boolean DEFAULT false NOT NULL;

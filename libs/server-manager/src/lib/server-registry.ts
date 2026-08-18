@@ -25,6 +25,14 @@ export class ServerRegistry {
     return manager;
   }
 
+  delete(id: string): void {
+    if (!this.managers.has(id)) {
+      throw new Error(`Server with id "${id}" not found`);
+    }
+
+    this.managers.delete(id);
+  }
+
   list(): Map<string, ServerManager> {
     return new Map(this.managers);
   }

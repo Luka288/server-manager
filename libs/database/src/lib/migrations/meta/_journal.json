@@ -8,6 +8,13 @@
       "when": 1786877621031,
       "tag": "0000_stormy_silver_surfer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787051285136,
+      "tag": "0001_previous_mantis",
+      "breakpoints": true
     }
   ]
 }
