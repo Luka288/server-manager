@@ -1,9 +1,10 @@
-@use 'apps/client/src/styles/variables' as theme;
+@use 'variables' as variable;
+@use 'mixins' as mixins;
 
 .dashboard {
   width: 100%;
   height: 100vh;
-  background-color: theme.$background-dark;
-  color: theme.$text-primary;
-  font-family: theme.$font-family;
+  background-color: variable.$background-dark;
+  color: variable.$text-primary;
+  font-family: variable.$font-family;
 }

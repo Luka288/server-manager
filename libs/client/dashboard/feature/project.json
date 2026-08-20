@@ -1,10 +1,10 @@
 {
-  "name": "feature",
+  "name": "client-dashboard-feature",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/client/dashboard/feature/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["type:feature", "scope:client"],
   "targets": {
     "test": {
       "executor": "@nx/jest:jest",
