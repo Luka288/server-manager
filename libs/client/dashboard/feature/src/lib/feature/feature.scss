@@ -1,0 +1,9 @@
+@use 'apps/client/src/styles/variables' as theme;
+
+.dashboard {
+  width: 100%;
+  height: 100vh;
+  background-color: theme.$background-dark;
+  color: theme.$text-primary;
+  font-family: theme.$font-family;
+}

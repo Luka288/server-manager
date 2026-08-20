@@ -21,7 +21,10 @@
             "input": "apps/client/public"
           }
         ],
-        "styles": ["apps/client/src/styles.scss"]
+        "styles": ["apps/client/src/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["apps/client/src/styles"]
+        }
       },
       "configurations": {
         "production": {
