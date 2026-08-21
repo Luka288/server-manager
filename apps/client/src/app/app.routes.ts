@@ -5,6 +5,6 @@ export const appRoutes: Route[] = [
     path: '',
     title: 'Dashboard',
     loadComponent: () =>
-      import('@game-server/dashboard-feature').then((m) => m.Feature),
+      import('@game-server/dashboard/feature').then((m) => m.Dashboard),
   },
 ];
