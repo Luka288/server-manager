@@ -1,0 +1,19 @@
+{
+  "name": "server/unpnp",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/unpn/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/unpn",
+        "main": "libs/server/unpn/src/index.ts",
+        "tsConfig": "libs/server/unpn/tsconfig.lib.json",
+        "assets": ["libs/server/unpn/*.md"]
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@ import { db, servers as serversTable } from '@game-server/database';
 import { eq } from 'drizzle-orm';
 import { getPublicIp, getServerPort } from '../lib/public-ip';
 import { existsSync } from 'node:fs';
+import { openPort, closePort } from '@game-server/server/unpnp';
 
 export function createServerRoutes(registry: ServerRegistry) {
   const router = Router();
@@ -128,6 +129,16 @@ export function createServerRoutes(registry: ServerRegistry) {
 
       currentServer.start();
 
+      const port = getServerPort(row.serverDirectory);
+      try {
+        await openPort(port);
+        console.log(`[${server_id}] UPnP: opened port ${port}`);
+      } catch (upnpErr) {
+        console.error(
+          `[${server_id}] UPnP open failed: ${(upnpErr as Error).message}`,
+        );
+      }
+
       if (!row.initialized) {
         await db
           .update(serversTable)
@@ -144,13 +155,28 @@ export function createServerRoutes(registry: ServerRegistry) {
     }
   });
 
-  router.post('/:id/stop', (req, res) => {
+  router.post('/:id/stop', async (req, res) => {
     const server_id = req.params.id;
 
     try {
       const currentServer = registry.get(server_id);
 
       currentServer.stop();
+
+      const [row] = await db
+        .select()
+        .from(serversTable)
+        .where(eq(serversTable.id, server_id));
+
+      const port = getServerPort(row.serverDirectory);
+      try {
+        await closePort(port);
+        console.log(`[${server_id}] UPnP: closed port ${port}`);
+      } catch (upnpErr) {
+        console.error(
+          `[${server_id}] UPnP close failed: ${(upnpErr as Error).message}`,
+        );
+      }
 
       res.json({
         id: server_id,

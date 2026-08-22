@@ -3,12 +3,16 @@ import { ServerRegistry } from '@game-server/server-manager';
 import { createServerRoutes } from './routes/servers';
 import { db, servers as serversTable } from '@game-server/database';
 import { buildMinecraftCommand } from '@game-server/command-builder';
+import cors from 'cors';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 async function main(): Promise<void> {
   const app = express();
+
+  app.use(cors());
+
   app.use(express.json());
 
   const registry = new ServerRegistry();
@@ -26,7 +30,7 @@ async function main(): Promise<void> {
     registry.create(row.id, { ...command, name: row.name });
   }
 
-  app.use('/api/servers', createServerRoutes(registry));
+  app.use('/', createServerRoutes(registry));
 
   app.listen(port, host, () => {
     console.log(`[ ready ] http://${host}:${port}`);

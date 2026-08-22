@@ -36,6 +36,14 @@
       ],
       "@game-server/client/sidepanel/types": [
         "./libs/client/sidepanel/types/src/index.ts"
+      ],
+      "@game-server/server/unpnp": ["./libs/server/unpn/src/index.ts"],
+      "@game-server/types": ["./libs/client/shared/types/src/index.ts"],
+      "@game-server/client/shared": [
+        "./libs/client/shared/data-access/src/index.ts"
+      ],
+      "@game-server/client/environment": [
+        "./apps/client/src/environments/environment.ts"
       ]
     }
   },

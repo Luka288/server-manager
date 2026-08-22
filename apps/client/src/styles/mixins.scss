@@ -1,3 +1,5 @@
+@use 'variables' as *;
+
 @mixin flex-center($gap: 0px) {
   display: flex;
   justify-content: center;
@@ -12,4 +14,103 @@
   flex-wrap: $wrap;
   gap: $gap;
   flex-direction: $dir;
+}
+
+@mixin button-base {
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: $font-family;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+@mixin button-variant($color) {
+  @include button-base;
+  background: rgba($color, 0.12);
+  color: $color;
+
+  &:hover {
+    background: rgba($color, 0.2);
+  }
+
+  &:active {
+    background: rgba($color, 0.28);
+  }
+}
+
+@mixin icon-button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: $text-muted;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: $text-white;
+  }
+}
+
+@mixin status-pill($color) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba($color, 0.1);
+  color: $color;
+  width: fit-content;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $color;
+  }
+}
+
+@mixin stat-card {
+  background: $dark-grey;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+@mixin nav-item {
+  @include flex($align: center, $gap: 10px);
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: $text-secondary;
+  text-decoration: none;
+  font-size: 14px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: $text-white;
+  }
+
+  &.active {
+    background: rgba($accent-blue, 0.12);
+    color: $accent-blue;
+  }
 }
