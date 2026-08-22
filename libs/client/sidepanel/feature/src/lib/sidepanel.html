@@ -1,1 +1,9 @@
-<nav></nav>
+<nav>
+  <ul>
+    @for (item of navigation; track $index) {
+    <li>
+      <a [routerLink]="item?.path">{{item.name}}</a>
+    </li>
+    }
+  </ul>
+</nav>
