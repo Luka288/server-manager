@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: game-server-db
+    environment:
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: gameserver
+    ports:
+      - '5432:5432'
+    volumes:
+      - game-server-db-data:/var/lib/postgresql/data
+
+volumes:
+  game-server-db-data:
