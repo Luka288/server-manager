@@ -11,7 +11,7 @@ export class DashboardService {
   readonly serverList = signal<Server[]>([]);
 
   getServerList() {
-    return this.ApiService.get<Server[]>('/').pipe(
+    return this.ApiService.get<Server[]>('').pipe(
       tap((servers) => {
         this.serverList.set(servers);
       }),

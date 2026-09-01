@@ -44,6 +44,12 @@
       ],
       "@game-server/client/environment": [
         "./apps/client/src/environments/environment.ts"
+      ],
+      "@game-server/client/terminal/data-access": [
+        "./libs/client/terminal/data-access/src/index.ts"
+      ],
+      "@game-server/client/terminal/feature": [
+        "./libs/client/terminal/feature/src/index.ts"
       ]
     }
   },

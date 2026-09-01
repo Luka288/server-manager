@@ -5,19 +5,26 @@ import {
   toObservable,
   toSignal,
 } from '@angular/core/rxjs-interop';
+import { ClientTerminal } from '@game-server/client/terminal/feature';
 import { Server } from '@game-server/types';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class Dashboard {
   private readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
-  readonly servers = toSignal(toObservable(this.dashboardService.serverList), {
+  /*
+    manual subscribtions must be changed
+  */
+
+  readonly servers = toSignal(this.dashboardService.getServerList(), {
     initialValue: [] as Server[],
   });
 
@@ -26,8 +33,10 @@ export class Dashboard {
       .length;
   });
 
-  ngOnInit(): void {
-    this.dashboardService.getServerList().subscribe();
+  // [routerLink]="['/servers', server.id, 'console']"
+
+  navToTerminal(serverId: string): void {
+    this.router.navigateByUrl(`/servers/${serverId}/console`);
   }
 
   startServer(id: string): void {

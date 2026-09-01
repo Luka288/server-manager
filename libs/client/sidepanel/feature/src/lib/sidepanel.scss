@@ -7,6 +7,7 @@ nav {
   background-color: variable.$bg-sidebar;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
   padding: 20px 12px;
+  box-sizing: border-box;
 
   ul {
     margin: 0;

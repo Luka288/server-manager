@@ -34,10 +34,13 @@
       </thead>
       <tbody>
         @for (server of servers(); track server.id) {
-        <tr>
+        <tr
+          class="clickable-row"
+          (click)="navToTerminal(server.id); $event.stopImmediatePropagation()"
+        >
           <td class="server-name-cell">
             <span class="icon-square" [class]="server.status"></span>
-            <span>{{ server.name }}</span>
+            <a>{{ server.name }}</a>
           </td>
 
           <td>
@@ -49,14 +52,20 @@
 
           <td class="actions">
             @if (server.status === 'running') {
-            <button class="btn-stop" (click)="stopServer(server.id)">
+            <button
+              class="btn-stop"
+              (click)="stopServer(server.id); $event.stopPropagation()"
+            >
               Stop
             </button>
             <button class="btn-restart" aria-label="Restart">
               <i class="ti ti-refresh"></i>
             </button>
             } @else {
-            <button class="btn-start" (click)="startServer(server.id)">
+            <button
+              class="btn-start"
+              (click)="startServer(server.id); $event.stopPropagation()"
+            >
               Start
             </button>
             }

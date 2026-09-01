@@ -1,0 +1,15 @@
+<section id="terminal">
+  <div class="terminal-content">
+    <!--  -->
+  </div>
+
+  <div class="terminal-input">
+    <form (submit)="$event.preventDefault(); onSubmit()">
+      <input
+        type="text"
+        [formField]="terminalForm.command"
+        placeholder="Enter command..."
+      />
+    </form>
+  </div>
+</section>

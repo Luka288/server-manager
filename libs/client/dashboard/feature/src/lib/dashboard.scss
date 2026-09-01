@@ -3,7 +3,7 @@
 
 .dashboard {
   color: variable.$text-primary;
-  padding: 2rem;
+  // padding: 2rem;
   min-height: 100vh;
   box-sizing: border-box;
 
@@ -101,6 +101,11 @@
           display: flex;
           align-items: center;
           gap: 1rem;
+
+          a {
+            text-decoration: none;
+            color: variable.$text-secondary;
+          }
 
           .icon-square {
             width: 32px;
@@ -200,4 +205,8 @@
       }
     }
   }
+}
+
+.clickable-row {
+  cursor: pointer;
 }
