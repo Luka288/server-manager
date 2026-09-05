@@ -4,6 +4,9 @@ import { createServerRoutes } from './routes/servers';
 import { db, servers as serversTable } from '@game-server/database';
 import { buildMinecraftCommand } from '@game-server/command-builder';
 import cors from 'cors';
+import { createServer } from 'node:http';
+import { WebSocketServer } from 'ws';
+import { ServerSocket } from './lib/server-socket';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -12,10 +15,15 @@ async function main(): Promise<void> {
   const app = express();
 
   app.use(cors());
-
   app.use(express.json());
 
   const registry = new ServerRegistry();
+
+  // Httpserver
+  const HttpServer = createServer(app);
+
+  // WebSocket server
+  const serverSocket = new ServerSocket(HttpServer, registry);
 
   const rows = await db.select().from(serversTable);
 
@@ -27,13 +35,24 @@ async function main(): Promise<void> {
       name: row.name,
     });
 
-    registry.create(row.id, { ...command, name: row.name });
+    const manager = registry.create(row.id, {
+      ...command,
+      name: row.name,
+    });
+
+    serverSocket.attachManager(row.id, manager);
   }
 
-  app.use('/', createServerRoutes(registry));
+  app.use(
+    '/',
+    createServerRoutes(registry, (serverId, manager) => {
+      serverSocket.attachManager(serverId, manager);
+    }),
+  );
 
-  app.listen(port, host, () => {
+  HttpServer.listen(port, host, () => {
     console.log(`[ ready ] http://${host}:${port}`);
+    console.log(`[ ws ] ws://${host}:${port}/ws`);
   });
 }
 

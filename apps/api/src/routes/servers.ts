@@ -12,7 +12,13 @@ import { getPublicIp, getServerPort } from '../lib/public-ip';
 import { existsSync } from 'node:fs';
 import { openPort, closePort } from '@game-server/server/unpnp';
 
-export function createServerRoutes(registry: ServerRegistry) {
+export function createServerRoutes(
+  registry: ServerRegistry,
+  onServerCreated?: (
+    serverId: string,
+    manager: ReturnType<ServerRegistry['create']>,
+  ) => void,
+) {
   const router = Router();
 
   router.get('/', (req, res) => {
@@ -65,6 +71,8 @@ export function createServerRoutes(registry: ServerRegistry) {
     });
 
     const server = registry.create(uuid, { ...command, name });
+
+    onServerCreated?.(uuid, server);
 
     server.on('stdout', (chunk) => {
       console.log(`[${uuid}] [stdout]: ${chunk}`);

@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit } from '@angular/core';
 import { DashboardService } from '@game-server/dashboard-data-access';
 import {
   takeUntilDestroyed,
@@ -15,7 +15,7 @@ import { Router, RouterLink } from '@angular/router';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
@@ -24,14 +24,23 @@ export class Dashboard {
     manual subscribtions must be changed
   */
 
-  readonly servers = toSignal(this.dashboardService.getServerList(), {
-    initialValue: [] as Server[],
-  });
+  readonly servers = this.dashboardService.serverList;
+
+  // readonly servers = toSignal(this.dashboardService.getServerList(), {
+  //   initialValue: [] as Server[],
+  // });
 
   readonly runningServers = computed(() => {
     return this.servers().filter((server) => server.status === 'running')
       .length;
   });
+
+  ngOnInit(): void {
+    this.dashboardService
+      .getServerList()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 
   // [routerLink]="['/servers', server.id, 'console']"
 

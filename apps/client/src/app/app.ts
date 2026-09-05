@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Sidepanel } from '@game-server/sidepanel/feature';
+import { SocketService } from '@game-server/client/shared';
 
 @Component({
   imports: [RouterModule, Sidepanel],
@@ -8,4 +9,10 @@ import { Sidepanel } from '@game-server/sidepanel/feature';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App implements OnInit {
+  private readonly socketService = inject(SocketService);
+
+  ngOnInit(): void {
+    this.socketService.connect();
+  }
+}

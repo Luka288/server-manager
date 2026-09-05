@@ -1,7 +1,8 @@
 import { spawn, ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { ServerManagerOptions, ServerStatus } from './types';
+import { ServerManagerOptions } from './types';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { ServerStatus } from '@game-server/shared/types';
 
 /* ServerManager class extends to the EventEmitter because whenever
    something changes it will automatically fire event

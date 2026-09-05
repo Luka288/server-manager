@@ -50,7 +50,8 @@
       ],
       "@game-server/client/terminal/feature": [
         "./libs/client/terminal/feature/src/index.ts"
-      ]
+      ],
+      "@game-server/shared/types": ["./libs/shared/types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
