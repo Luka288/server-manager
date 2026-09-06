@@ -6,7 +6,7 @@ export interface CreateServerForm {
   gamemode: Gamemode;
   difficulty: Difficulty;
 
-  maxPlayers: number;
+  maxPlayers: string;
   pvp: boolean;
   whitelist: boolean;
   onlineMode: boolean;

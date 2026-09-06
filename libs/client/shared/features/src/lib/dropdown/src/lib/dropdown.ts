@@ -12,7 +12,7 @@ export class Dropdown {
   label = input<string>();
   id = input<string>();
   FormField = input.required<Field<string>>();
-  options = input<string[] | number[]>();
+  options = input<string[]>();
 
   constructor() {
     effect(() => {

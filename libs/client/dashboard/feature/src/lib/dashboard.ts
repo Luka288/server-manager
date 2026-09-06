@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateModal } from '@game-server/client/create-modal';
+import { CreateServerForm } from '@game-server/client/types';
 
 @Component({
   selector: 'lib-dashboard',
@@ -48,7 +49,13 @@ export class Dashboard implements OnInit {
       }
 
       console.log('Server form: ', formData);
+
+      this.createServer(formData);
     });
+  }
+
+  createServer(payload: CreateServerForm) {
+    this.dashboardService.create(payload).subscribe();
   }
 
   navToTerminal(serverId: string): void {

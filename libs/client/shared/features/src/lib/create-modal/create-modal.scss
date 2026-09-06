@@ -14,6 +14,8 @@
 
 .create-modal {
   width: 480px;
+  max-height: 500px;
+  overflow-y: scroll;
   box-sizing: border-box;
   background-color: variable.$bg-card;
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -22,6 +24,28 @@
   font-family: variable.$font-family;
   color: variable.$text-primary;
   padding: 24px;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 12px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+  }
 
   .modal-header {
     display: flex;

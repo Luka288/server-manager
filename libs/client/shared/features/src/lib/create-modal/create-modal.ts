@@ -19,12 +19,12 @@ export class CreateModal {
   private readonly dialog = inject(MatDialogRef);
 
   readonly serverFormModel = signal<CreateServerForm>({
-    name: '',
-    memoryMb: 4096,
-    version: '',
-    gamemode: 'survival',
-    difficulty: 'normal',
-    maxPlayers: 20,
+    name: '', // done
+    memoryMb: 4096, // done
+    version: '', // done
+    gamemode: 'survival', // done
+    difficulty: 'normal', // done
+    maxPlayers: '20', // done
     pvp: true,
     whitelist: false,
     onlineMode: false, // allows none official minecraft users to join server (can be changed by user)
@@ -38,7 +38,7 @@ export class CreateModal {
 
   // must move as export consts
   readonly gamemodeOptions = ['survival', 'creative', 'adventure', 'spectator'];
-  readonly maxPlayersOptions = [5, 10, 20, 50, 100];
+  readonly maxPlayersOptions = ['5', '10', '20', '50', '100'];
 
   // must be changed to gameVersions signal to avoid spamming requests
   readonly gameVersions = toSignal(this.versionsService.getServerVersions(), {

@@ -24,7 +24,11 @@ export class ServerManager extends EventEmitter {
 
   // checking if server is running before we run new one
   isRunning(): boolean {
-    return this.serverStatus === 'running' || this.serverStatus === 'starting';
+    return this.serverStatus === 'running';
+  }
+
+  isStarting(): boolean {
+    return this.serverStatus === 'starting';
   }
 
   start(): void {
@@ -50,16 +54,22 @@ export class ServerManager extends EventEmitter {
     );
 
     this.childProcess.stdout?.on('data', (data: Buffer) => {
-      this.emit('stdout', data.toString());
+      const output = data.toString();
+
+      this.emit('stdout', output);
+
+      if (output.includes('Done (')) {
+        this.setStatus('running');
+      }
     });
 
     this.childProcess.stderr?.on('data', (data: Buffer) => {
       this.emit('stderr', data.toString());
     });
 
-    this.childProcess.on('spawn', () => {
-      this.setStatus('running');
-    });
+    // this.childProcess.on('spawn', () => {
+    //   this.setStatus('starting');
+    // });
 
     this.childProcess.on('exit', (code, signal) => {
       this.setStatus(

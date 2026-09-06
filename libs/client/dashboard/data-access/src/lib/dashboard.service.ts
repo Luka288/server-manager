@@ -1,6 +1,6 @@
 import { inject, Service, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Server } from '@game-server/client/types';
+import { CreateServerForm, Server } from '@game-server/client/types';
 import { ApiService } from '@game-server/client/shared';
 import { tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
@@ -13,6 +13,8 @@ export class DashboardService {
   readonly serverList = signal<Server[]>([]);
 
   constructor() {
+    this.socketService.connect();
+
     this.socketService.events$.pipe().subscribe((event) => {
       if (event.type !== 'server-status') {
         return;
@@ -35,6 +37,14 @@ export class DashboardService {
     return this.ApiService.get<Server[]>('').pipe(
       tap((servers) => {
         this.serverList.set(servers);
+      }),
+    );
+  }
+
+  create(payload: CreateServerForm) {
+    return this.ApiService.post<Server>('/', payload).pipe(
+      tap((res) => {
+        this.serverList.update((servers) => [...servers, res]);
       }),
     );
   }

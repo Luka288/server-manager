@@ -31,7 +31,7 @@
             [formField]="serverForm.name"
           />
 
-          @if (serverForm.name().touched() && serverForm.name().invalid()) {
+          @if (serverForm.name().dirty() && serverForm.name().invalid()) {
           <span class="form-error"> Server name is required </span>
           }
         </div>
@@ -50,15 +50,6 @@
 
         <!-- Version -->
         <div class="form-group">
-          <!-- <label for="server-version">Server Version</label>
-
-          <input
-            id="server-version"
-            type="text"
-            placeholder="26.1"
-            [formField]="serverForm.version"
-          /> -->
-
           <lib-dropdown
             [FormField]="serverForm.version"
             [label]="'Server version'"
@@ -72,12 +63,24 @@
           }
         </div>
 
+        <!-- gamemode -->
         <div class="form-group">
           <lib-dropdown
             [label]="'Gamemode'"
             [id]="'gamemode'"
             [FormField]="serverForm.gamemode"
             [options]="gamemodeOptions"
+          />
+        </div>
+
+        <!-- players -->
+
+        <div class="form-group">
+          <lib-dropdown
+            [label]="'Max players'"
+            [id]="'max-players'"
+            [FormField]="serverForm.maxPlayers"
+            [options]="maxPlayersOptions"
           />
         </div>
       </section>
