@@ -116,6 +116,32 @@ export function createServerRoutes(
     });
   });
 
+  router.get('/versions', async (req, res) => {
+    try {
+      const response = await fetch(
+        'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
+      );
+
+      if (!response.ok) {
+        throw new Error(`Mojang API returned ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const versions = data.versions
+        .filter((version: { type: string }) => version.type === 'release')
+        .map((version: { id: string }) => version.id);
+
+      res.json(versions);
+    } catch (error) {
+      console.error('Failed to fetch Minecraft versions:', error);
+
+      res.status(500).json({
+        error: 'Failed to fetch Minecraft versions',
+      });
+    }
+  });
+
   router.post('/:id/start', async (req, res) => {
     const server_id = req.params.id;
 

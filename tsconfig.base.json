@@ -38,7 +38,7 @@
         "./libs/client/sidepanel/types/src/index.ts"
       ],
       "@game-server/server/unpnp": ["./libs/server/unpn/src/index.ts"],
-      "@game-server/types": ["./libs/client/shared/types/src/index.ts"],
+      "@game-server/client/types": ["./libs/client/shared/types/src/index.ts"],
       "@game-server/client/shared": [
         "./libs/client/shared/data-access/src/index.ts"
       ],
@@ -51,7 +51,16 @@
       "@game-server/client/terminal/feature": [
         "./libs/client/terminal/feature/src/index.ts"
       ],
-      "@game-server/shared/types": ["./libs/shared/types/src/index.ts"]
+      "@game-server/shared/types": ["./libs/shared/types/src/index.ts"],
+      "@game-server/client/create-modal": [
+        "./libs/client/shared/features/src/index.ts"
+      ],
+      "@game-server/client/shared/dropdown": [
+        "./libs/client/shared/features/src/lib/dropdown/src/index.ts"
+      ],
+      "@game-server/dropdown": [
+        "./libs/client/shared/features/src/lib/dropdown/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

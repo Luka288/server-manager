@@ -1,17 +1,13 @@
 import { Component, computed, DestroyRef, inject, OnInit } from '@angular/core';
 import { DashboardService } from '@game-server/dashboard-data-access';
-import {
-  takeUntilDestroyed,
-  toObservable,
-  toSignal,
-} from '@angular/core/rxjs-interop';
-import { ClientTerminal } from '@game-server/client/terminal/feature';
-import { Server } from '@game-server/types';
-import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { CreateModal } from '@game-server/client/create-modal';
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -19,6 +15,7 @@ export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly dialogRef = inject(MatDialog);
 
   /*
     manual subscribtions must be changed
@@ -42,7 +39,17 @@ export class Dashboard implements OnInit {
       .subscribe();
   }
 
-  // [routerLink]="['/servers', server.id, 'console']"
+  openCreate(): void {
+    const dialog = this.dialogRef.open(CreateModal);
+
+    dialog.afterClosed().subscribe((formData) => {
+      if (!formData) {
+        return;
+      }
+
+      console.log('Server form: ', formData);
+    });
+  }
 
   navToTerminal(serverId: string): void {
     this.router.navigateByUrl(`/servers/${serverId}/console`);
