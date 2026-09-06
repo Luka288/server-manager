@@ -68,6 +68,13 @@
             >
               Start
             </button>
+
+            <button
+              class="btn-delete"
+              (click)="deleteServer(server.id); $event.stopPropagation()"
+            >
+              Delete
+            </button>
             }
           </td>
         </tr>

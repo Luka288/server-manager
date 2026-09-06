@@ -75,4 +75,11 @@ export class Dashboard implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(console.log);
   }
+
+  deleteServer(id: string) {
+    this.dashboardService
+      .delete(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
 }

@@ -72,4 +72,16 @@ export class DashboardService {
       }),
     );
   }
+
+  delete(id: string) {
+    return this.ApiService.delete<{ id: string; deleted: boolean }>(
+      `${id}/delete`,
+    ).pipe(
+      tap((res) => {
+        this.serverList.update((servers) =>
+          servers.filter((server) => server.id !== res.id),
+        );
+      }),
+    );
+  }
 }
