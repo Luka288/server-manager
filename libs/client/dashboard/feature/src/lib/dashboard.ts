@@ -55,7 +55,7 @@ export class Dashboard implements OnInit {
   }
 
   createServer(payload: CreateServerForm) {
-    this.dashboardService.create(payload).subscribe();
+    this.dashboardService.create(payload).subscribe(console.log);
   }
 
   navToTerminal(serverId: string): void {
