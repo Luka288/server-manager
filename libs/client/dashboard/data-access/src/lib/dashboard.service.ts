@@ -1,13 +1,14 @@
 import { inject, Service, signal } from '@angular/core';
 import { CreateServerForm, Server } from '@game-server/client/types';
-import { ApiService } from '@game-server/client/shared';
-import { tap } from 'rxjs';
+import { ApiService, StateService } from '@game-server/client/shared';
+import { finalize, tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
 
 @Service()
 export class DashboardService {
   private readonly ApiService = inject(ApiService);
   private readonly socketService = inject(SocketService);
+  private readonly stateService = inject(StateService);
 
   readonly serverList = signal<Server[]>([]);
 
@@ -40,8 +41,17 @@ export class DashboardService {
     );
   }
 
+  /* 
+    TODO: must add state to track when the server is creating
+  */
   create(payload: CreateServerForm) {
+    this.stateService.serverCreationState.set(true);
+
     return this.ApiService.post<Server>('/', payload).pipe(
+      finalize(() => {
+        this.stateService.serverCreationState.set(false);
+      }),
+
       tap((res) => {
         this.serverList.update((servers) => [...servers, res]);
       }),

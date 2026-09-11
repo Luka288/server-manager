@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateModal } from '@game-server/client/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
+import { StateService } from '@game-server/client/shared';
 
 @Component({
   selector: 'lib-dashboard',
@@ -17,6 +18,7 @@ export class Dashboard implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly dialogRef = inject(MatDialog);
+  readonly stateService = inject(StateService);
 
   /*
     manual subscribtions must be changed

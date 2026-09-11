@@ -2,10 +2,12 @@ import {
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   OnDestroy,
   OnInit,
   signal,
+  ViewChild,
 } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { ConsoleService } from '@game-server/client/shared';
@@ -90,6 +92,8 @@ export class ClientTerminal implements OnInit, OnDestroy {
 
   onSubmit(): void {
     if (this.terminalForm().valid()) {
+      this.consoleService.send(String(this.terminalModel().command));
+
       this.terminalModel.update((m) => ({ ...m, command: '' }));
     }
   }
