@@ -220,6 +220,14 @@
       &:hover {
         background: rgba(255, 255, 255, 0.015);
       }
+
+      &.log-warning {
+        color: variable.$status-warn;
+      }
+
+      &.log-error {
+        color: variable.$status-error;
+      }
     }
   }
 

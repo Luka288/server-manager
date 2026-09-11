@@ -46,7 +46,7 @@
 
     <div class="terminal-content">
       @for (cmd of terminalLines(); track $index) {
-      <p>{{ cmd.text }}</p>
+      <p [class]="checkTextStatus(cmd.text)">{{ cmd.text }}</p>
       }
     </div>
 

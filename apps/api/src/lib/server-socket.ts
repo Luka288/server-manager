@@ -7,8 +7,6 @@ import {
 } from '@game-server/shared/types';
 
 import { ServerRegistry, ServerManager } from '@game-server/server-manager';
-import { SrvRecord } from 'node:dns';
-import { Socket } from 'node:dgram';
 
 export class ServerSocket {
   private readonly wss: WebSocketServer;
@@ -36,6 +34,14 @@ export class ServerSocket {
         serverId,
         status,
       });
+
+      if (status === 'stopped') {
+        this.broadcastToSubscribers(serverId, {
+          type: 'console-output',
+          serverId,
+          data: `[${new Date().toLocaleTimeString()}] [ServerManager/INFO]: Server closed\r\n`,
+        });
+      }
     });
 
     manager.on('stdout', (data) => {

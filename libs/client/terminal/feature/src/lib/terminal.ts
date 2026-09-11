@@ -2,12 +2,10 @@ import {
   Component,
   computed,
   DestroyRef,
-  ElementRef,
   inject,
   OnDestroy,
   OnInit,
   signal,
-  ViewChild,
 } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { ConsoleService } from '@game-server/client/shared';
@@ -58,6 +56,33 @@ export class ClientTerminal implements OnInit, OnDestroy {
 
     return this.consoleService.linesRecord()[id] ?? [];
   });
+
+  checkTextStatus(text: string): string {
+    if (!text) return 'log-info';
+
+    const lowerText = text.toLowerCase();
+
+    if (
+      lowerText.includes('/error') ||
+      lowerText.includes('[error]') ||
+      lowerText.startsWith('error:') ||
+      lowerText.includes('exception') ||
+      lowerText.includes('fatal')
+    ) {
+      return 'log-error';
+    }
+
+    if (
+      lowerText.includes('/warn') ||
+      lowerText.includes('[warn]') ||
+      lowerText.startsWith('warning:') ||
+      lowerText.includes('warn:')
+    ) {
+      return 'log-warning';
+    }
+
+    return 'log-info';
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
