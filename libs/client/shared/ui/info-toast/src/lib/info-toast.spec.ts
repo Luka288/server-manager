@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ClientCreateModal } from './create-modal';
+import { InfoToast } from './info-toast';
 
-describe('ClientCreateModal', () => {
-  let component: ClientCreateModal;
-  let fixture: ComponentFixture<ClientCreateModal>;
+describe('InfoToast', () => {
+  let component: InfoToast;
+  let fixture: ComponentFixture<InfoToast>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClientCreateModal],
+      imports: [InfoToast],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ClientCreateModal);
+    fixture = TestBed.createComponent(InfoToast);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

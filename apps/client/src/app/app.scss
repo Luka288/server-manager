@@ -8,6 +8,7 @@
   background-color: variable.$bg-primary;
   font-family: variable.$font-family;
   box-sizing: border-box;
+  position: relative;
 
   @include mixin.flex($dir: row, $align: stretch, $gap: 5px);
 
@@ -24,4 +25,11 @@
     padding: 2rem;
     box-sizing: border-box;
   }
+}
+
+app-info-toast {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 3.5rem;
+  z-index: 1000;
 }

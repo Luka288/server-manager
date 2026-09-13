@@ -3,9 +3,9 @@ import { DashboardService } from '@game-server/dashboard-data-access';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { CreateModal } from '@game-server/client/create-modal';
+import { CreateModal } from '@game-server/client/shared/ui/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
-import { StateService } from '@game-server/client/shared';
+import { StateService, ToastService } from '@game-server/client/shared';
 
 @Component({
   selector: 'lib-dashboard',
@@ -18,6 +18,7 @@ export class Dashboard implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly dialogRef = inject(MatDialog);
+  private readonly toastService = inject(ToastService);
   readonly stateService = inject(StateService);
 
   /*
@@ -57,7 +58,22 @@ export class Dashboard implements OnInit {
   }
 
   createServer(payload: CreateServerForm) {
-    this.dashboardService.create(payload).subscribe(console.log);
+    const toastId = this.toastService.show('loading', 'Creating server...');
+
+    this.dashboardService.create(payload).subscribe({
+      next: () => {
+        this.toastService.dismiss(toastId);
+        this.toastService.show('success', 'Server created!', {
+          autoCloseMs: 3000,
+        });
+      },
+      error: () => {
+        this.toastService.dismiss(toastId);
+        this.toastService.show('error', 'Failed to create server.', {
+          autoCloseMs: 4000,
+        });
+      },
+    });
   }
 
   navToTerminal(serverId: string): void {

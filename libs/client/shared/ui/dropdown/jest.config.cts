@@ -1,9 +1,8 @@
 module.exports = {
   displayName: 'dropdown',
-  preset: '../../../../../../../jest.preset.js',
+  preset: '../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory:
-    '../../../../../../../coverage/libs/client/shared/features/src/lib/dropdown',
+  coverageDirectory: '../../../../../coverage/libs/client/shared/ui/dropdown',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

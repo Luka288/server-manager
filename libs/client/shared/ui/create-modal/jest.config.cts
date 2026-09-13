@@ -1,8 +1,9 @@
 module.exports = {
-  displayName: 'client/create-modal',
-  preset: '../../../../jest.preset.js',
+  displayName: 'create-modal',
+  preset: '../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../../../coverage/libs/client/shared/features',
+  coverageDirectory:
+    '../../../../../coverage/libs/client/shared/ui/create-modal',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

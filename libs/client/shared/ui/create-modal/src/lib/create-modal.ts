@@ -1,15 +1,14 @@
-import { Component, inject, signal, Version } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CreateServerForm } from '@game-server/client/types';
 import { MatDialogRef } from '@angular/material/dialog';
 import { form, FormField, required } from '@angular/forms/signals';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { from } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Dropdown } from '@game-server/client/shared/dropdown';
+import { Dropdown } from '@game-server/client/shared/ui/dropdown';
 import { VersionsService } from '@game-server/client/shared';
 
 @Component({
-  selector: 'lib-client-create-modal',
+  selector: 'app-client-create-modal',
   imports: [ReactiveFormsModule, FormsModule, FormField, Dropdown],
   templateUrl: './create-modal.html',
   styleUrl: './create-modal.scss',

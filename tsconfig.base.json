@@ -52,14 +52,14 @@
         "./libs/client/terminal/feature/src/index.ts"
       ],
       "@game-server/shared/types": ["./libs/shared/types/src/index.ts"],
-      "@game-server/client/create-modal": [
-        "./libs/client/shared/features/src/index.ts"
+      "@game-server/client/shared/ui/create-modal": [
+        "./libs/client/shared/ui/create-modal/src/index.ts"
       ],
-      "@game-server/client/shared/dropdown": [
-        "./libs/client/shared/features/src/lib/dropdown/src/index.ts"
+      "@game-server/client/shared/ui/dropdown": [
+        "./libs/client/shared/ui/dropdown/src/index.ts"
       ],
-      "@game-server/dropdown": [
-        "./libs/client/shared/features/src/lib/dropdown/src/index.ts"
+      "@game-server/client/shared/ui/info-toast": [
+        "./libs/client/shared/ui/info-toast/src/index.ts"
       ]
     }
   },
