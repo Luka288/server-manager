@@ -10,8 +10,16 @@ import { db, servers as serversTable } from '@game-server/database';
 import { eq } from 'drizzle-orm';
 import { getPublicIp, getServerPort } from '../lib/public-ip';
 import { existsSync } from 'node:fs';
+import { openPort, closePort } from '@game-server/server/unpnp';
+import { Socket } from 'node:dgram';
 
-export function createServerRoutes(registry: ServerRegistry) {
+export function createServerRoutes(
+  registry: ServerRegistry,
+  onServerCreated?: (
+    serverId: string,
+    manager: ReturnType<ServerRegistry['create']>,
+  ) => void,
+) {
   const router = Router();
 
   router.get('/', (req, res) => {
@@ -65,6 +73,8 @@ export function createServerRoutes(registry: ServerRegistry) {
 
     const server = registry.create(uuid, { ...command, name });
 
+    onServerCreated?.(uuid, server);
+
     server.on('stdout', (chunk) => {
       console.log(`[${uuid}] [stdout]: ${chunk}`);
     });
@@ -107,6 +117,32 @@ export function createServerRoutes(registry: ServerRegistry) {
     });
   });
 
+  router.get('/versions', async (req, res) => {
+    try {
+      const response = await fetch(
+        'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
+      );
+
+      if (!response.ok) {
+        throw new Error(`Mojang API returned ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const versions = data.versions
+        .filter((version: { type: string }) => version.type === 'release')
+        .map((version: { id: string }) => version.id);
+
+      res.json(versions);
+    } catch (error) {
+      console.error('Failed to fetch Minecraft versions:', error);
+
+      res.status(500).json({
+        error: 'Failed to fetch Minecraft versions',
+      });
+    }
+  });
+
   router.post('/:id/start', async (req, res) => {
     const server_id = req.params.id;
 
@@ -128,6 +164,16 @@ export function createServerRoutes(registry: ServerRegistry) {
 
       currentServer.start();
 
+      const port = getServerPort(row.serverDirectory);
+      try {
+        await openPort(port);
+        console.log(`[${server_id}] UPnP: opened port ${port}`);
+      } catch (upnpErr) {
+        console.error(
+          `[${server_id}] UPnP open failed: ${(upnpErr as Error).message}`,
+        );
+      }
+
       if (!row.initialized) {
         await db
           .update(serversTable)
@@ -144,13 +190,28 @@ export function createServerRoutes(registry: ServerRegistry) {
     }
   });
 
-  router.post('/:id/stop', (req, res) => {
+  router.post('/:id/stop', async (req, res) => {
     const server_id = req.params.id;
 
     try {
       const currentServer = registry.get(server_id);
 
       currentServer.stop();
+
+      const [row] = await db
+        .select()
+        .from(serversTable)
+        .where(eq(serversTable.id, server_id));
+
+      const port = getServerPort(row.serverDirectory);
+      try {
+        await closePort(port);
+        console.log(`[${server_id}] UPnP: closed port ${port}`);
+      } catch (upnpErr) {
+        console.error(
+          `[${server_id}] UPnP close failed: ${(upnpErr as Error).message}`,
+        );
+      }
 
       res.json({
         id: server_id,

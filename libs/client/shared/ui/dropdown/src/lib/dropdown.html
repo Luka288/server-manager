@@ -1,0 +1,11 @@
+<div class="input-dropdown">
+  <label class="dropdown__label" [for]="id()"> {{label()}} </label>
+
+  <div class="dropdown__control">
+    <select [id]="id()" [formField]="FormField()" class="dropdown__select">
+      @for (opt of options(); track $index) {
+      <option [value]="opt">{{opt}}</option>
+      }
+    </select>
+  </div>
+</div>

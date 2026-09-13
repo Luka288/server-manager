@@ -1,0 +1,13 @@
+<div class="toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+  <div class="toast" [class]="'toast--' + toast.type">
+    @if (toast.type === 'loading') {
+    <span class="spinner"></span>
+    }
+    <span>{{ toast.message }}</span>
+    @if (toast.type !== 'loading') {
+    <button (click)="toastService.dismiss(toast.id)">x</button>
+    }
+  </div>
+  }
+</div>

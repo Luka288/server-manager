@@ -1,0 +1,97 @@
+<div class="modal-backdrop">
+  <div class="create-modal">
+    <div class="modal-header">
+      <div>
+        <h2>Create Server</h2>
+        <p>Configure your new Minecraft server.</p>
+      </div>
+
+      <button
+        type="button"
+        class="close-btn"
+        aria-label="Close"
+        (click)="close()"
+      >
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+
+    <form (submit)="onSubmit()">
+      <section class="form-section">
+        <h3>Basic Information</h3>
+
+        <!-- Server Name -->
+        <div class="form-group">
+          <label for="server-name">Server Name</label>
+
+          <input
+            id="server-name"
+            type="text"
+            placeholder="My Minecraft Server"
+            [formField]="serverForm.name"
+          />
+
+          @if (serverForm.name().dirty() && serverForm.name().invalid()) {
+          <span class="form-error"> Server name is required </span>
+          }
+        </div>
+
+        <!-- Memory -->
+        <div class="form-group">
+          <label for="memory">Server Memory (MB)</label>
+
+          <input
+            id="memory"
+            type="number"
+            placeholder="4096"
+            [formField]="serverForm.memoryMb"
+          />
+        </div>
+
+        <!-- Version -->
+        <div class="form-group">
+          <lib-dropdown
+            [FormField]="serverForm.version"
+            [label]="'Server version'"
+            [id]="'server-version'"
+            [options]="gameVersions()"
+          />
+
+          @if (serverForm.version().touched() && serverForm.version().invalid())
+          {
+          <span class="form-error"> Server version is required </span>
+          }
+        </div>
+
+        <!-- gamemode -->
+        <div class="form-group">
+          <lib-dropdown
+            [label]="'Gamemode'"
+            [id]="'gamemode'"
+            [FormField]="serverForm.gamemode"
+            [options]="gamemodeOptions"
+          />
+        </div>
+
+        <!-- players -->
+
+        <div class="form-group">
+          <lib-dropdown
+            [label]="'Max players'"
+            [id]="'max-players'"
+            [FormField]="serverForm.maxPlayers"
+            [options]="maxPlayersOptions"
+          />
+        </div>
+      </section>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="close()">
+          Cancel
+        </button>
+
+        <button type="submit" class="btn-submit">Create server</button>
+      </footer>
+    </form>
+  </div>
+</div>

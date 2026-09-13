@@ -1,1 +1,85 @@
-<p>Dashboard works!</p>
+<section class="dashboard">
+  <header class="dashboard-header">
+    <div>
+      <h1>Servers</h1>
+      <p class="subtitle">
+        {{ servers().length }} total, {{ runningServers() }} running
+      </p>
+    </div>
+    <button class="btn-create" (click)="openCreate()">
+      <i class="ti ti-plus"></i>
+      Create server
+    </button>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <p class="stat-label">Total servers</p>
+      <p class="stat-value">{{ servers().length }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Running now</p>
+      <p class="stat-value stat-running">{{ runningServers() }}</p>
+    </div>
+  </div>
+
+  <div class="servers-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (server of servers(); track server.id) {
+        <tr
+          class="clickable-row"
+          (click)="navToTerminal(server.id); $event.stopImmediatePropagation()"
+        >
+          <td class="server-name-cell">
+            <span class="icon-square" [class]="server.status"></span>
+            <a>{{ server.name }}</a>
+          </td>
+
+          <td>
+            <span class="pill" [class]="server.status">
+              <span class="dot"></span>
+              {{ server.status }}
+            </span>
+          </td>
+
+          <td class="actions">
+            @if (server.status === 'running') {
+            <button
+              class="btn-stop"
+              (click)="stopServer(server.id); $event.stopPropagation()"
+            >
+              Stop
+            </button>
+            <button class="btn-restart" aria-label="Restart">
+              <i class="ti ti-refresh"></i>
+            </button>
+            } @else {
+            <button
+              class="btn-start"
+              (click)="startServer(server.id); $event.stopPropagation()"
+            >
+              Start
+            </button>
+
+            <button
+              class="btn-delete"
+              (click)="deleteServer(server.id); $event.stopPropagation()"
+            >
+              Delete
+            </button>
+            }
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

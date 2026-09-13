@@ -1,0 +1,65 @@
+<section id="terminal">
+  <div class="terminal-window">
+    <header class="terminal-header">
+      <div class="terminal-title">
+        <div class="terminal-icon">></div>
+        <span>Terminal</span>
+      </div>
+
+      <div class="terminal-actions">
+        <div class="terminal-status">
+          @if (serverStatus() === 'running') {
+          <span class="status-dot"></span>
+          <span>Running</span>
+          } @else {
+          <span class="status-dot stopped"></span>
+          <span>Stopped</span>
+          }
+        </div>
+
+        @if (serverStatus() === 'running') {
+        <button
+          class="terminal-button stop-button"
+          type="button"
+          (click)="stopServer(serverId()!)"
+        >
+          ■
+          <span>Stop</span>
+        </button>
+
+        <button class="terminal-button restart-button" type="button">
+          ↻
+          <span>Restart</span>
+        </button>
+        } @else {
+        <button
+          class="terminal-button start-button"
+          type="button"
+          (click)="startServer(serverId()!)"
+        >
+          ▶
+          <span>Start</span>
+        </button>
+        }
+      </div>
+    </header>
+
+    <div class="terminal-content">
+      @for (cmd of terminalLines(); track $index) {
+      <p [class]="checkTextStatus(cmd.text)">{{ cmd.text }}</p>
+      }
+    </div>
+
+    <div class="terminal-input">
+      <form (submit)="$event.preventDefault(); onSubmit()">
+        <input
+          type="text"
+          [formField]="terminalForm.command"
+          placeholder="Enter command..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </form>
+    </div>
+  </div>
+</section>

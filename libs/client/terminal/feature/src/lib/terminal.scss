@@ -1,0 +1,293 @@
+@use 'variables' as variable;
+@use 'mixins' as mixin;
+
+::ng-deep {
+  .app-content {
+    padding: 0 !important;
+  }
+}
+
+#terminal {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  background: variable.$bg-primary;
+  color: variable.$text-primary;
+
+  overflow: hidden;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  .terminal-window {
+    display: flex;
+    flex-direction: column;
+
+    width: calc(100% - 32px);
+    height: calc(100% - 32px);
+
+    margin: 16px;
+
+    background: #0f0f12;
+    border: 1px solid #292832;
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+
+  .terminal-header {
+    height: 48px;
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 16px;
+
+    background: #17161c;
+    border-bottom: 1px solid #292832;
+
+    .terminal-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      color: variable.$text-primary;
+      font-size: 13px;
+      font-weight: 500;
+
+      .terminal-icon {
+        width: 28px;
+        height: 28px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 6px;
+
+        background: variable.$btn-nav-active-bg;
+        color: variable.$accent-blue;
+
+        font-size: 14px;
+      }
+    }
+
+    .terminal-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      color: variable.$text-secondary;
+      font-family: variable.$font-family;
+      font-size: 12px;
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: variable.$status-running-dot;
+
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+
+        &.stopped {
+          background: variable.$status-stopped-dot;
+        }
+      }
+    }
+
+    .terminal-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .terminal-button {
+      height: 30px;
+
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      padding: 0 10px;
+
+      border: 1px solid transparent;
+      border-radius: 6px;
+
+      font-family: variable.$font-family;
+      font-size: 11px;
+      font-weight: 500;
+
+      cursor: pointer;
+
+      transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.1s ease;
+
+      &:active {
+        transform: scale(0.97);
+      }
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
+
+    .restart-button {
+      color: variable.$text-secondary;
+      background: #202027;
+      border-color: #2d2d36;
+
+      &:hover {
+        color: variable.$text-primary;
+        background: #282830;
+        border-color: #393943;
+      }
+    }
+
+    .stop-button {
+      color: variable.$status-danger-text;
+      background: variable.$status-danger-bg;
+      border-color: rgba(248, 113, 113, 0.12);
+
+      &:hover {
+        background: #3d2028;
+        border-color: rgba(248, 113, 113, 0.25);
+      }
+    }
+  }
+
+  .terminal-content {
+    flex: 1;
+    min-height: 0;
+
+    padding: 20px 22px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background:
+      radial-gradient(
+        circle at top left,
+        rgba(59, 130, 246, 0.025),
+        transparent 35%
+      ),
+      #0f0f12;
+
+    scrollbar-width: thin;
+    scrollbar-color: #34343d transparent;
+
+    &::-webkit-scrollbar {
+      width: 7px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #34343d;
+      border-radius: 10px;
+
+      &:hover {
+        background: #454550;
+      }
+    }
+
+    p {
+      margin: 0;
+      padding: 3px 0;
+
+      color: #d1d5db;
+
+      font-size: 13px;
+      line-height: 1.6;
+
+      white-space: pre-wrap;
+      word-break: break-word;
+
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.015);
+      }
+
+      &.log-warning {
+        color: variable.$status-warn;
+      }
+
+      &.log-error {
+        color: variable.$status-error;
+      }
+    }
+  }
+
+  .terminal-input {
+    min-height: 54px;
+    padding: 0 20px;
+
+    display: flex;
+    align-items: center;
+
+    background: #151419;
+    border-top: 1px solid #292832;
+
+    form {
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    &::before {
+      content: 'server@manager:~$';
+
+      margin-right: 10px;
+
+      color: variable.$status-running-text;
+
+      font-size: 13px;
+      font-weight: 500;
+
+      white-space: nowrap;
+    }
+
+    input {
+      flex: 1;
+
+      width: 100%;
+      height: 36px;
+
+      padding: 0;
+
+      background: transparent;
+      border: none;
+      outline: none;
+
+      color: #f3f4f6;
+
+      font-family: inherit;
+      font-size: 13px;
+
+      caret-color: variable.$accent-blue;
+
+      &::placeholder {
+        color: #55555f;
+      }
+
+      &:focus {
+        &::placeholder {
+          color: #3f3f49;
+        }
+      }
+    }
+  }
+}

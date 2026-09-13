@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { sidepanelNavigation } from '@game-server/client/sidepanel/types';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
-  selector: 'lib-sidepanel',
-  imports: [RouterLink],
+  selector: 'app-sidepanel',
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidepanel.html',
   styleUrl: './sidepanel.scss',
 })

@@ -1,0 +1,114 @@
+@use 'variables' as variable;
+@use 'mixins' as mixin;
+
+.toast-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+}
+
+.toast {
+  @include mixin.flex($dir: row, $align: center, $gap: 10px);
+
+  min-width: 320px;
+  max-width: 420px;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background-color: #1a1d24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: #e4e6eb;
+  font-family: variable.$font-family;
+  font-size: 0.875rem;
+  animation: toast-in 0.2s ease-out;
+
+  &--success {
+    border-left: 3px solid #22c55e;
+  }
+  &--error {
+    border-left: 3px solid #ef4444;
+  }
+  &--info {
+    border-left: 3px solid #3b82f6;
+  }
+  &--loading {
+    border-left: 3px solid #6b7280;
+  }
+}
+
+.toast__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast__message {
+  flex: 1;
+}
+
+.toast__close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  &--success {
+    background-color: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+  }
+  &--error {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+  }
+  &--info {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

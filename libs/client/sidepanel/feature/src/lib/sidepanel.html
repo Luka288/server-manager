@@ -1,8 +1,11 @@
 <nav>
   <ul>
     @for (item of navigation; track $index) {
-    <li>
-      <a [routerLink]="item?.path">{{item.name}}</a>
+    <li routerLinkActive="active">
+      <a [routerLink]="item?.path">
+        <i class="ti" [class]="item"></i>
+        {{ item.name }}
+      </a>
     </li>
     }
   </ul>

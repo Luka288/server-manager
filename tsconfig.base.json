@@ -36,6 +36,30 @@
       ],
       "@game-server/client/sidepanel/types": [
         "./libs/client/sidepanel/types/src/index.ts"
+      ],
+      "@game-server/server/unpnp": ["./libs/server/unpn/src/index.ts"],
+      "@game-server/client/types": ["./libs/client/shared/types/src/index.ts"],
+      "@game-server/client/shared": [
+        "./libs/client/shared/data-access/src/index.ts"
+      ],
+      "@game-server/client/environment": [
+        "./apps/client/src/environments/environment.ts"
+      ],
+      "@game-server/client/terminal/data-access": [
+        "./libs/client/terminal/data-access/src/index.ts"
+      ],
+      "@game-server/client/terminal/feature": [
+        "./libs/client/terminal/feature/src/index.ts"
+      ],
+      "@game-server/shared/types": ["./libs/shared/types/src/index.ts"],
+      "@game-server/client/shared/ui/create-modal": [
+        "./libs/client/shared/ui/create-modal/src/index.ts"
+      ],
+      "@game-server/client/shared/ui/dropdown": [
+        "./libs/client/shared/ui/dropdown/src/index.ts"
+      ],
+      "@game-server/client/shared/ui/info-toast": [
+        "./libs/client/shared/ui/info-toast/src/index.ts"
       ]
     }
   },
