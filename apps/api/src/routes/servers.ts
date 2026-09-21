@@ -11,7 +11,6 @@ import { eq } from 'drizzle-orm';
 import { getPublicIp, getServerPort } from '../lib/public-ip';
 import { existsSync } from 'node:fs';
 import { openPort, closePort } from '@game-server/server/unpnp';
-import { Socket } from 'node:dgram';
 
 export function createServerRoutes(
   registry: ServerRegistry,
@@ -115,6 +114,7 @@ export function createServerRoutes(
       id: uuid,
       name: name,
       status: server.getStatus(),
+      directory: server.getDirectory(),
     });
   });
 
@@ -156,10 +156,18 @@ export function createServerRoutes(
         .where(eq(serversTable.id, server_id));
 
       if (row.initialized && !existsSync(row.serverDirectory)) {
+        currentServer.markStatus('crashed');
+
+        await db
+          .update(serversTable)
+          .set({ status: 'crashed' })
+          .where(eq(serversTable.id, server_id));
+
         res.status(409).json({
           error: 'Server folder is missing. It may have been moved or deleted.',
           code: 'FOLDER_MISSING',
         });
+
         return;
       }
 

@@ -219,6 +219,15 @@
         background-color: variable.$status-stopped-dot;
       }
     }
+
+    &.crashed {
+      background-color: variable.$status-stopped-bg;
+      color: variable.$status-stopped-text;
+
+      .dot {
+        background-color: variable.$status-crashed;
+      }
+    }
   }
 }
 
