@@ -2,103 +2,76 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   OnDestroy,
   OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { ConsoleService } from '@game-server/client/shared';
 import { ActivatedRoute } from '@angular/router';
 import { DashboardService } from '@game-server/dashboard-data-access';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ScrollDirective } from '@game-server/directives';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'lib-client-terminal',
-  imports: [FormField],
+  imports: [FormField, ScrollDirective],
   templateUrl: './terminal.html',
   styleUrl: './terminal.scss',
 })
-export class ClientTerminal implements OnInit, OnDestroy {
+export class ClientTerminal {
   private readonly route = inject(ActivatedRoute);
   private readonly consoleService = inject(ConsoleService);
-  private readonly dashboardService = inject(DashboardService);
+  readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly terminalModel = signal({ command: '' });
+  readonly logClass = logClass;
 
+  readonly terminalModel = signal({ command: '' });
   readonly terminalForm = form(this.terminalModel, (path) => {
     required(path.command, { message: 'Command is empty' });
   });
 
-  readonly serverId = signal<string | null>(null);
+  readonly serverId = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id'))),
+    { initialValue: null },
+  );
 
-  // readonly terminalLines = this.consoleService.linesRecord;
   readonly serverList = this.dashboardService.serverList;
 
   readonly server = computed(() => {
-    return this.serverList().find((server) => server.id === this.serverId());
+    return this.dashboardService
+      .serverList()
+      .find((s) => s.id === this.serverId());
   });
 
   readonly serverStatus = computed(() => {
-    return this.serverList().find((server) => server.id === this.serverId())
-      ?.status;
+    console.log(this.server()?.status);
+    return this.server()?.status;
   });
 
   readonly terminalLines = computed(() => {
     const id = this.serverId();
-
-    if (!id) {
-      return [];
-    }
-
-    console.log(this.consoleService.linesRecord());
-
-    return this.consoleService.linesRecord()[id] ?? [];
+    return id ? (this.consoleService.linesRecord()[id] ?? []) : [];
   });
 
-  checkTextStatus(text: string): string {
-    if (!text) return 'log-info';
+  constructor() {
+    this.dashboardService
+      .getServerList()
+      .pipe(takeUntilDestroyed())
+      .subscribe();
 
-    const lowerText = text.toLowerCase();
+    effect((onCleanup) => {
+      const id = this.serverId();
+      if (!id) return;
 
-    if (
-      lowerText.includes('/error') ||
-      lowerText.includes('[error]') ||
-      lowerText.startsWith('error:') ||
-      lowerText.includes('exception') ||
-      lowerText.includes('fatal')
-    ) {
-      return 'log-error';
-    }
-
-    if (
-      lowerText.includes('/warn') ||
-      lowerText.includes('[warn]') ||
-      lowerText.startsWith('warning:') ||
-      lowerText.includes('warn:')
-    ) {
-      return 'log-warning';
-    }
-
-    return 'log-info';
-  }
-
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-
-    if (!id) {
-      return;
-    }
-
-    this.serverId.set(id);
-
-    this.consoleService.watch(id);
-  }
-
-  ngOnDestroy(): void {
-    const id = this.route.snapshot.paramMap.get('id')!;
-    this.consoleService.stopWatching(id);
+      untracked(() => this.consoleService.watch(id));
+      onCleanup(() => this.consoleService.stopWatching(id));
+    });
   }
 
   startServer(id: string) {
@@ -122,4 +95,14 @@ export class ClientTerminal implements OnInit, OnDestroy {
       this.terminalModel.update((m) => ({ ...m, command: '' }));
     }
   }
+}
+
+export function logClass(
+  text: string,
+): 'log-info' | 'log-warning' | 'log-error' {
+  const t = text.toLowerCase();
+
+  if (/\/error|\[error]|^error:|exception|fatal/.test(t)) return 'log-error';
+  if (/\/warn|\[warn]|^warning:|warn:/.test(t)) return 'log-warning';
+  return 'log-info';
 }

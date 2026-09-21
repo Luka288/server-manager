@@ -121,6 +121,11 @@ export class ServerManager extends EventEmitter {
     return this.serverManagerOptions.name;
   }
 
+  // this must be Desktop at default
+  getDirectory(): string {
+    return this.serverManagerOptions.cwd;
+  }
+
   // single public method that allows to updated status outside from the class
   markStatus(status: ServerStatus): void {
     this.setStatus(status);

@@ -29,6 +29,8 @@
         <tr>
           <th>Name</th>
           <th>Status</th>
+          <th>ID</th>
+          <th>Directory</th>
           <th></th>
         </tr>
       </thead>
@@ -49,6 +51,9 @@
               {{ server.status }}
             </span>
           </td>
+
+          <td class="muted">{{ server.id }}</td>
+          <td class="muted">{{ server.directory }}</td>
 
           <td class="actions">
             @if (server.status === 'running') {

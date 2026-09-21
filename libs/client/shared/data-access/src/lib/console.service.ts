@@ -41,7 +41,7 @@ export class ConsoleService {
           [event.serverId]: [
             ...(record[event.serverId] ?? []),
             {
-              type: 'stdout',
+              type: 'stderr',
               text: event.data,
             },
           ],

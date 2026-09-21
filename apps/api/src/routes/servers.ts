@@ -29,6 +29,7 @@ export function createServerRoutes(
       id,
       name: manager.getName(),
       status: manager.getStatus(),
+      directory: manager.getDirectory(),
     }));
 
     res.json(servers);

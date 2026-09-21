@@ -60,6 +60,9 @@
       ],
       "@game-server/client/shared/ui/info-toast": [
         "./libs/client/shared/ui/info-toast/src/index.ts"
+      ],
+      "@game-server/directives": [
+        "./libs/client/shared/ui/directives/src/index.ts"
       ]
     }
   },

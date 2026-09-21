@@ -1,5 +1,4 @@
-import { inject, Service } from '@angular/core';
-import { ApiService } from './api.service';
+import { Service } from '@angular/core';
 import { Subject } from 'rxjs';
 import {
   ClientSocketEvent,

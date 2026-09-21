@@ -11,6 +11,9 @@
           @if (serverStatus() === 'running') {
           <span class="status-dot"></span>
           <span>Running</span>
+          } @else if(serverStatus() === 'starting') {
+          <span class="status-dot starting"></span>
+          <span>Starting</span>
           } @else {
           <span class="status-dot stopped"></span>
           <span>Stopped</span>
@@ -31,6 +34,15 @@
           ↻
           <span>Restart</span>
         </button>
+        }@else if (serverStatus() === 'starting') {
+        <button
+          class="terminal-button stop-button"
+          type="button"
+          (click)="startServer(serverId()!)"
+        >
+          ▶
+          <span>Stop</span>
+        </button>
         } @else {
         <button
           class="terminal-button start-button"
@@ -44,9 +56,9 @@
       </div>
     </header>
 
-    <div class="terminal-content">
+    <div class="terminal-content" scrollDirective>
       @for (cmd of terminalLines(); track $index) {
-      <p [class]="checkTextStatus(cmd.text)">{{ cmd.text }}</p>
+      <p [class]="logClass(cmd.text)">{{ cmd.text }}</p>
       }
     </div>
 

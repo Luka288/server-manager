@@ -98,8 +98,8 @@
         vertical-align: middle;
 
         &.server-name-cell {
-          display: flex;
-          align-items: center;
+          @include mixin.flex($align: center);
+
           gap: 1rem;
 
           a {
@@ -122,6 +122,10 @@
               background-color: variable.$status-danger-text;
             }
           }
+        }
+
+        &.muted {
+          color: variable.$text-secondary;
         }
 
         &.actions {
