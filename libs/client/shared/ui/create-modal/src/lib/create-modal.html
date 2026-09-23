@@ -85,6 +85,24 @@
         </div>
 
         <div class="form-group">
+          <lib-dropdown
+            [label]="'White list'"
+            [id]="'white-list'"
+            [FormField]="serverForm.whitelist"
+            [options]="booleans"
+          />
+        </div>
+
+        <div class="form-group">
+          <lib-dropdown
+            [label]="'Enable PVP'"
+            [id]="'pvp'"
+            [FormField]="serverForm.pvp"
+            [options]="booleans"
+          />
+        </div>
+
+        <div class="form-group">
           <label for="worldSeed">World seed</label>
 
           <input id="worldSeed" [formField]="serverForm.worldSeed!" />

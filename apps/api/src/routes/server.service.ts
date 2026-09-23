@@ -66,7 +66,8 @@ export class ServersService {
     } = input;
 
     const id = randomUUID();
-    const serverDirectory = `${SERVERS_ROOT}/${id}`;
+    // changed folder naming from UUID to actual servers name with servers UUID first letters
+    const serverDirectory = `${SERVERS_ROOT}/${toFolderName(name, id)}`; // ! this must be user custom directory
 
     const command = buildMinecraftCommand({
       memoryMb,
@@ -175,8 +176,6 @@ export class ServersService {
     return updated;
   }
 
-  // ---------------------------------------------------------------- helpers
-
   private getManager(id: string): ServerManager {
     try {
       return this.registry.get(id);
@@ -225,11 +224,20 @@ function attachProcessLogging(id: string, server: ServerManager) {
   );
 }
 
-/** Errors thrown by the process manager (already running, etc.) are conflicts. */
 function asConflict<T>(fn: () => T): T {
   try {
     return fn();
   } catch (err) {
     throw HttpError.conflict((err as Error).message);
   }
+}
+
+function toFolderName(name: string, id: string): string {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+
+  return `${slug || 'server'}-${id.slice(0, 8)}`;
 }

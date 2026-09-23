@@ -7,8 +7,8 @@ export interface CreateServerForm {
   difficulty: Difficulty;
 
   maxPlayers: string;
-  pvp: boolean;
-  whitelist: boolean;
+  pvp: string;
+  whitelist: string;
   onlineMode: boolean;
 
   worldSeed?: string;

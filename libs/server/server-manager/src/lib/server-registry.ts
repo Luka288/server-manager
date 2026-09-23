@@ -1,5 +1,5 @@
 import { ServerManager } from './server-manager';
-import { ServerManagerOptions, ServerStatus } from './types';
+import { ServerManagerOptions } from './types';
 
 export class ServerRegistry {
   private managers = new Map<string, ServerManager>();

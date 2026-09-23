@@ -1,6 +1,6 @@
 import { Component, effect, input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Field, form, FormField, required } from '@angular/forms/signals';
+import { Field, FormField } from '@angular/forms/signals';
 
 @Component({
   selector: 'lib-dropdown',
@@ -12,7 +12,7 @@ export class Dropdown {
   label = input<string>();
   id = input<string>();
   FormField = input.required<Field<string>>();
-  options = input<string[]>();
+  options = input<string[] | boolean[]>();
 
   constructor() {
     effect(() => {
