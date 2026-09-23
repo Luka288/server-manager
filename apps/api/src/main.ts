@@ -1,12 +1,12 @@
 import express from 'express';
 import { ServerRegistry } from '@game-server/server-manager';
-import { createServerRoutes } from './routes/servers';
+import { createServerRoutes } from './routes/index';
 import { db, servers as serversTable } from '@game-server/database';
 import { buildMinecraftCommand } from '@game-server/command-builder';
 import cors from 'cors';
 import { createServer } from 'node:http';
-import { WebSocketServer } from 'ws';
 import { ServerSocket } from './lib/server-socket';
+import { errorHandler } from './lib/error-handler';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -19,10 +19,7 @@ async function main(): Promise<void> {
 
   const registry = new ServerRegistry();
 
-  // Httpserver
   const HttpServer = createServer(app);
-
-  // WebSocket server
   const serverSocket = new ServerSocket(HttpServer, registry);
 
   const rows = await db.select().from(serversTable);
@@ -49,6 +46,8 @@ async function main(): Promise<void> {
       serverSocket.attachManager(serverId, manager);
     }),
   );
+
+  app.use(errorHandler);
 
   HttpServer.listen(port, host, () => {
     console.log(`[ ready ] http://${host}:${port}`);
