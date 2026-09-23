@@ -6,10 +6,12 @@
         {{ servers().length }} total, {{ runningServers() }} running
       </p>
     </div>
-    <button class="btn-create" (click)="openCreate()">
-      <i class="ti ti-plus"></i>
-      Create server
-    </button>
+    <div class="actions">
+      <button class="btn-create" (click)="openCreate()">
+        <i class="ti ti-plus"></i>
+        Create server
+      </button>
+    </div>
   </header>
 
   <div class="stats-row">
@@ -53,7 +55,7 @@
           </td>
 
           <td class="muted">{{ server.id }}</td>
-          <td class="muted">{{ server.directory }}</td>
+          <td class="muted">{{ server.serverDirectory }}</td>
 
           <td class="actions">
             @if (server.status === 'running') {
@@ -65,6 +67,15 @@
             </button>
             <button class="btn-restart" aria-label="Restart">
               <i class="ti ti-refresh"></i>
+            </button>
+            }@else if (server.status === 'crashed') {
+            <button
+              class="btn-start"
+              type="button"
+              (click)="locatePath(server.id); $event.stopImmediatePropagation()"
+            >
+              <i class="ti ti-folder"></i>
+              Update server directory
             </button>
             } @else {
             <button

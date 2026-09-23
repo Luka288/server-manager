@@ -130,4 +130,12 @@ export class ServerManager extends EventEmitter {
   markStatus(status: ServerStatus): void {
     this.setStatus(status);
   }
+
+  updateDirectory(path: string): void {
+    if (this.isRunning() || this.isStarting()) {
+      throw new Error('Cannot change directory while server is running');
+    }
+
+    this.serverManagerOptions.cwd = path;
+  }
 }

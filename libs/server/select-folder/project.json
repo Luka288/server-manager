@@ -1,0 +1,20 @@
+{
+  "name": "selectfolder",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/select-folder/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/server/select-folder",
+        "tsConfig": "libs/server/select-folder/tsconfig.lib.json",
+        "packageJson": "libs/server/select-folder/package.json",
+        "main": "libs/server/select-folder/src/index.ts",
+        "assets": ["libs/server/select-folder/*.md"]
+      }
+    }
+  }
+}

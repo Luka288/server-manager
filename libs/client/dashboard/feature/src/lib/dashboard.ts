@@ -1,4 +1,11 @@
-import { Component, computed, DestroyRef, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { DashboardService } from '@game-server/dashboard-data-access';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -6,10 +13,18 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateModal } from '@game-server/client/shared/ui/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
 import { StateService, ToastService } from '@game-server/client/shared';
+import { ReactiveFormsModule } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
+import { filter, map, switchMap, tap } from 'rxjs';
+
+export interface FolderSearchModel {
+  path: string;
+  serverId: string;
+}
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [],
+  imports: [ReactiveFormsModule, FormField],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -24,6 +39,14 @@ export class Dashboard implements OnInit {
   /*
     manual subscribtions must be changed
   */
+
+  readonly searchModel = signal<FolderSearchModel>({
+    path: '', // new folder path that will be sent to backend and will be rewritten to servers path
+    serverId: '',
+  });
+  readonly FolderPathForm = form(this.searchModel, (path) => {
+    required(path.path);
+  });
 
   readonly servers = this.dashboardService.serverList;
 
@@ -51,8 +74,6 @@ export class Dashboard implements OnInit {
         return;
       }
 
-      console.log('Server form: ', formData);
-
       this.createServer(formData);
     });
   }
@@ -74,6 +95,22 @@ export class Dashboard implements OnInit {
         });
       },
     });
+  }
+
+  locatePath(serverId: string): void {
+    this.dashboardService
+      .selectAndUpdateFolderPath(serverId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (path) =>
+          this.searchModel.update((model) => ({
+            ...model,
+            path,
+            serverId: serverId,
+          })),
+        error: (error) =>
+          console.error('Failed to select/update folder:', error),
+      });
   }
 
   navToTerminal(serverId: string): void {

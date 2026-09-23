@@ -63,6 +63,9 @@
       ],
       "@game-server/directives": [
         "./libs/client/shared/ui/directives/src/index.ts"
+      ],
+      "@game-server/server/selectfolder": [
+        "./libs/server/select-folder/src/index.ts"
       ]
     }
   },

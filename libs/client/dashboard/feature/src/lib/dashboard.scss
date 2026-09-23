@@ -42,6 +42,14 @@
       &:hover {
         opacity: 0.9;
       }
+
+      input {
+        display: none;
+      }
+    }
+
+    .actions {
+      @include mixin.flex($gap: 15px);
     }
   }
 

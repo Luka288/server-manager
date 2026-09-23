@@ -10,7 +10,7 @@ export interface Server {
   id: string;
   name: string;
   status: ServerStatus;
-  directory: string;
+  serverDirectory: string;
 }
 
 export interface ServerDetail extends Server {

@@ -1,7 +1,7 @@
 import { inject, Service, signal } from '@angular/core';
 import { CreateServerForm, Server } from '@game-server/client/types';
 import { ApiService, StateService } from '@game-server/client/shared';
-import { finalize, tap } from 'rxjs';
+import { filter, finalize, map, switchMap, tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
 
 @Service()
@@ -91,6 +91,40 @@ export class DashboardService {
           servers.filter((server) => server.id !== res.id),
         );
       }),
+    );
+  }
+
+  selectPath() {
+    return this.ApiService.post<{ path: string }>('select-folder', {});
+  }
+
+  updateFolderPath(path: string, serverId: string) {
+    return this.ApiService.post<{ message: string; server: Server }>(
+      'update-folder-path',
+      {
+        path,
+        serverId,
+      },
+    ).pipe(
+      tap((res) => {
+        this.serverList.update((servers) =>
+          servers.map((server) =>
+            server.id === serverId
+              ? { ...server, serverDirectory: res.server.serverDirectory }
+              : server,
+          ),
+        );
+      }),
+    );
+  }
+
+  selectAndUpdateFolderPath(serverId: string) {
+    return this.selectPath().pipe(
+      map(({ path }) => path),
+      filter((path): path is string => !!path),
+      switchMap((path) =>
+        this.updateFolderPath(path, serverId).pipe(map(() => path)),
+      ),
     );
   }
 }

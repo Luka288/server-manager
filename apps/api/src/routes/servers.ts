@@ -11,6 +11,7 @@ import { eq } from 'drizzle-orm';
 import { getPublicIp, getServerPort } from '../lib/public-ip';
 import { existsSync } from 'node:fs';
 import { openPort, closePort } from '@game-server/server/unpnp';
+import { selectfolder } from '@game-server/server/selectfolder';
 
 export function createServerRoutes(
   registry: ServerRegistry,
@@ -28,7 +29,7 @@ export function createServerRoutes(
       id,
       name: manager.getName(),
       status: manager.getStatus(),
-      directory: manager.getDirectory(),
+      serverDirectory: manager.getDirectory(),
     }));
 
     res.json(servers);
@@ -114,7 +115,7 @@ export function createServerRoutes(
       id: uuid,
       name: name,
       status: server.getStatus(),
-      directory: server.getDirectory(),
+      serverDirectory: server.getDirectory(),
     });
   });
 
@@ -312,6 +313,70 @@ export function createServerRoutes(
       res.json({ id: serverId, deleted: true });
     } catch (error) {
       res.status(404).json({ error: 'Server not found' });
+    }
+  });
+
+  router.post('/select-folder', async (_req, res) => {
+    try {
+      const folderPath = await selectfolder();
+
+      if (!folderPath) {
+        return res
+          .status(404)
+          .json({ error: 'Folder path could not found', path: null });
+      }
+
+      return res.json({ path: folderPath });
+    } catch (error) {
+      console.error('Failed to select folder:', error);
+
+      return res.status(500).json({
+        message: 'Failed to select folder',
+      });
+    }
+  });
+
+  router.post('/update-folder-path', async (req, res) => {
+    try {
+      const { path, serverId } = req.body;
+
+      if (typeof serverId !== 'string' || !serverId.trim()) {
+        return res.status(400).json({ error: 'Missing or invalid serverId' });
+      }
+
+      if (typeof path !== 'string' || !path.trim()) {
+        return res.status(400).json({ error: 'Missing or invalid path' });
+      }
+
+      const manager = registry.get(serverId);
+
+      try {
+        manager.updateDirectory(path);
+      } catch (error) {
+        return res.status(409).json({ error: (error as Error).message });
+      }
+
+      const updatedServer = await db
+        .update(serversTable)
+        .set({ serverDirectory: path })
+        .where(eq(serversTable.id, serverId))
+        .returning();
+
+      if (updatedServer.length === 0) {
+        return res.status(404).json({ error: 'Server not found' });
+      }
+
+      return res.status(200).json({
+        message: 'Folder path updated successfully',
+        server: updatedServer[0],
+      });
+    } catch (error) {
+      if ((error as Error).message.includes('not found')) {
+        return res.status(404).json({ error: 'Server not found' });
+      }
+
+      console.error('Failed to update folder path:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   });
 
