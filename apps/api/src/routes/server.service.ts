@@ -15,6 +15,7 @@ import type {
   OnServerCreated,
   ServerManager,
 } from './server.types';
+import path from 'node:path';
 
 const SERVERS_ROOT = './servers';
 const DEFAULT_JAR_FILE = 'server.jar';
@@ -61,22 +62,24 @@ export class ServersService {
       name,
       memoryMb,
       version,
+      serverDirectory,
       jarFile = DEFAULT_JAR_FILE,
       ...properties
     } = input;
 
     const id = randomUUID();
     // changed folder naming from UUID to actual servers name with servers UUID first letters
-    const serverDirectory = `${SERVERS_ROOT}/${toFolderName(name, id)}`; // ! this must be user custom directory
+    const directory = path.join(serverDirectory, toFolderName(name, id)); // ! this must be user custom directory
 
     const command = buildMinecraftCommand({
       memoryMb,
       jarFile,
-      serverDirectory,
+      serverDirectory: directory,
       name,
     });
 
-    writeServerProperties(serverDirectory, properties);
+    console.log('writeServerProperties args:', { directory, properties });
+    writeServerProperties(directory, properties);
 
     const server = this.registry.create(id, { ...command, name });
 
@@ -88,7 +91,7 @@ export class ServersService {
         id,
         server,
         version,
-        `${serverDirectory}/${jarFile}`,
+        path.join(directory, jarFile),
       );
     }
 
@@ -97,7 +100,7 @@ export class ServersService {
       name,
       memoryMb,
       jarFile,
-      serverDirectory,
+      serverDirectory: directory,
       version: version ?? null,
       status: server.getStatus(),
     });

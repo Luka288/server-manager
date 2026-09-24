@@ -13,6 +13,9 @@ export class ServerSocket {
 
   private readonly subscriptions = new Map<WebSocket, Set<string>>();
 
+  private readonly history = new Map<string, ServerSocketEvent[]>();
+  private static readonly MAX_HISTORY = 1000;
+
   constructor(
     httpServer: HttpServer,
     private readonly registry: ServerRegistry,
@@ -29,14 +32,14 @@ export class ServerSocket {
 
   attachManager(serverId: string, manager: ServerManager): void {
     manager.on('statusChange', (status) => {
-      this.broadcast({
-        type: 'server-status',
-        serverId,
-        status,
-      });
+      if (status === 'starting') {
+        this.history.set(serverId, []);
+      }
+
+      this.broadcast({ type: 'server-status', serverId, status });
 
       if (status === 'stopped') {
-        this.broadcastToSubscribers(serverId, {
+        this.pushConsole(serverId, {
           type: 'console-output',
           serverId,
           data: `[${new Date().toLocaleTimeString()}] [ServerManager/INFO]: Server closed\r\n`,
@@ -45,19 +48,11 @@ export class ServerSocket {
     });
 
     manager.on('stdout', (data) => {
-      this.broadcastToSubscribers(serverId, {
-        type: 'console-output',
-        serverId,
-        data,
-      });
+      this.pushConsole(serverId, { type: 'console-output', serverId, data });
     });
 
     manager.on('stderr', (data) => {
-      this.broadcastToSubscribers(serverId, {
-        type: 'console-error',
-        serverId,
-        data,
-      });
+      this.pushConsole(serverId, { type: 'console-error', serverId, data });
     });
   }
 
@@ -68,6 +63,10 @@ export class ServerSocket {
 
     socket.on('message', (raw) => {
       this.handleMessage(socket, raw.toString());
+    });
+
+    socket.on('close', () => {
+      this.subscriptions.delete(socket);
     });
   }
 
@@ -112,6 +111,10 @@ export class ServerSocket {
         serverId,
         status: manager.getStatus(),
       });
+
+      for (const event of this.history.get(serverId) ?? []) {
+        this.send(socket, event);
+      }
     } catch (error) {
       console.error(`[ws] Subscribe failed: ${(error as Error).message}`);
     }
@@ -156,5 +159,17 @@ export class ServerSocket {
     if (socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(event));
     }
+  }
+
+  private pushConsole(serverId: string, event: ServerSocketEvent): void {
+    const list = this.history.get(serverId) ?? [];
+    list.push(event);
+
+    if (list.length > ServerSocket.MAX_HISTORY) {
+      list.splice(0, list.length - ServerSocket.MAX_HISTORY);
+    }
+
+    this.history.set(serverId, list);
+    this.broadcastToSubscribers(serverId, event);
   }
 }

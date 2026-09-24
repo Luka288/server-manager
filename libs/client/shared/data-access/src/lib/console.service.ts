@@ -55,7 +55,7 @@ export class ConsoleService {
 
     this.linesRecord.update((record) => ({
       ...record,
-      [serverId]: record[serverId] ?? [],
+      [serverId]: [],
     }));
 
     this.socketService.subscribeToServer(serverId);

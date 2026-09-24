@@ -32,30 +32,25 @@ export class ServerManager extends EventEmitter {
   }
 
   start(): void {
-    if (this.isRunning()) {
-      throw new Error('Server is already running!');
+    if (this.isRunning() || this.isStarting()) {
+      throw new Error('Server is already running or starting!');
     }
 
     this.setStatus('starting');
-
-    // server file creation must be set at the desktop or custom location where to user wants
     mkdirSync(this.serverManagerOptions.cwd, { recursive: true });
-
-    // automatically sets minecraft server eula to true
     writeFileSync(`${this.serverManagerOptions.cwd}/eula.txt`, 'eula=true');
 
-    this.childProcess = spawn(
+    const child = spawn(
       this.serverManagerOptions.command,
       this.serverManagerOptions.args,
-      {
-        cwd: this.serverManagerOptions.cwd,
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
+      { cwd: this.serverManagerOptions.cwd, stdio: ['pipe', 'pipe', 'pipe'] },
     );
+    this.childProcess = child;
 
-    this.childProcess.stdout?.on('data', (data: Buffer) => {
+    child.stdout?.on('data', (data: Buffer) => {
+      if (this.childProcess !== child) return;
+
       const output = data.toString();
-
       this.emit('stdout', output);
 
       if (output.includes('Done (')) {
@@ -63,25 +58,25 @@ export class ServerManager extends EventEmitter {
       }
     });
 
-    this.childProcess.stderr?.on('data', (data: Buffer) => {
+    child.stderr?.on('data', (data: Buffer) => {
+      if (this.childProcess !== child) return;
       this.emit('stderr', data.toString());
     });
 
-    // this.childProcess.on('spawn', () => {
-    //   this.setStatus('starting');
-    // });
+    child.on('exit', (code, signal) => {
+      if (this.childProcess !== child) return;
 
-    this.childProcess.on('exit', (code, signal) => {
+      this.childProcess = null;
       this.setStatus(
         signal === 'SIGTERM' || code === 0 ? 'stopped' : 'crashed',
       );
-
       this.emit('exit', code);
-
-      this.childProcess = null;
     });
 
-    this.childProcess.on('error', (err) => {
+    child.on('error', (err) => {
+      if (this.childProcess !== child) return;
+
+      this.childProcess = null;
       this.setStatus('crashed');
       this.emit('stderr', `Process error: ${err.message}`);
     });
@@ -137,5 +132,9 @@ export class ServerManager extends EventEmitter {
     }
 
     this.serverManagerOptions.cwd = path;
+  }
+
+  dispose(): void {
+    this.childProcess?.kill();
   }
 }

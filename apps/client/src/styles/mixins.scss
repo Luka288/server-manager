@@ -114,3 +114,55 @@
     color: $accent-blue;
   }
 }
+
+@mixin input-button {
+  @include flex($align: center, $gap: 8px);
+  width: 100%;
+  padding: 9px 12px;
+  background: $bg-item-square;
+  border: 1px solid rgba($text-white, 0.08);
+  border-radius: 8px;
+  color: $text-muted;
+  font-family: $font-family;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease;
+
+  i {
+    font-size: 16px;
+    color: $text-secondary;
+    transition: color 0.15s ease;
+  }
+
+  &:hover {
+    background: lighten($bg-item-square, 2%);
+    border-color: rgba($text-white, 0.16);
+    color: $text-white;
+
+    i {
+      color: $accent-blue;
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: $btn-primary-bg;
+    box-shadow: 0 0 0 3px rgba($btn-primary-bg, 0.2);
+  }
+
+  &:active {
+    background: $bg-card;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}

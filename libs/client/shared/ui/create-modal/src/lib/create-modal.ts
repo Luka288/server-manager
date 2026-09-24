@@ -1,11 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, model, signal } from '@angular/core';
 import { CreateServerForm } from '@game-server/client/types';
 import { MatDialogRef } from '@angular/material/dialog';
 import { form, FormField, required } from '@angular/forms/signals';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Dropdown } from '@game-server/client/shared/ui/dropdown';
-import { VersionsService } from '@game-server/client/shared';
+import { FolderService, VersionsService } from '@game-server/client/shared';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-client-create-modal',
@@ -15,6 +16,7 @@ import { VersionsService } from '@game-server/client/shared';
 })
 export class CreateModal {
   private readonly versionsService = inject(VersionsService);
+  private readonly folderService = inject(FolderService);
   private readonly dialog = inject(MatDialogRef);
 
   readonly serverFormModel = signal<CreateServerForm>({
@@ -24,15 +26,17 @@ export class CreateModal {
     gamemode: 'survival', // done
     difficulty: 'normal', // done
     maxPlayers: '20', // done
-    pvp: 'true', //? partially done
-    whitelist: 'false', //? partially done needs to be tested
+    pvp: 'true', // done
+    whitelist: 'false', //done
     onlineMode: false, // allows none official minecraft users to join server (can be changed by user)
     worldSeed: '', // done
+    serverDirectory: '',
   });
 
   readonly serverForm = form(this.serverFormModel, (path) => {
     required(path.version);
     required(path.name);
+    required(path.serverDirectory);
   });
 
   // must move as export consts
@@ -55,5 +59,19 @@ export class CreateModal {
     }
 
     this.dialog.close(this.serverFormModel());
+  }
+
+  locatePath() {
+    this.folderService
+      .selectPath()
+      .pipe(
+        tap((result) => {
+          this.serverFormModel.update((model) => ({
+            ...model,
+            serverDirectory: result.path,
+          }));
+        }),
+      )
+      .subscribe();
   }
 }

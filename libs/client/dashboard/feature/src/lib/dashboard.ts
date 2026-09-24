@@ -15,7 +15,6 @@ import { CreateServerForm } from '@game-server/client/types';
 import { StateService, ToastService } from '@game-server/client/shared';
 import { ReactiveFormsModule } from '@angular/forms';
 import { form, FormField, required } from '@angular/forms/signals';
-import { filter, map, switchMap, tap } from 'rxjs';
 
 export interface FolderSearchModel {
   path: string;
@@ -24,7 +23,7 @@ export interface FolderSearchModel {
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [ReactiveFormsModule, FormField],
+  imports: [ReactiveFormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -99,13 +98,13 @@ export class Dashboard implements OnInit {
 
   locatePath(serverId: string): void {
     this.dashboardService
-      .selectAndUpdateFolderPath(serverId)
+      .updatePath(serverId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (path) =>
           this.searchModel.update((model) => ({
             ...model,
-            path,
+            path: path.serverDirectory,
             serverId: serverId,
           })),
         error: (error) =>

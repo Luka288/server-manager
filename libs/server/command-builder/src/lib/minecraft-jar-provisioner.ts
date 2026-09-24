@@ -32,15 +32,35 @@ export async function getServerJarUrl(version: string) {
   return detail.downloads.server.url;
 }
 
+// command-builder: provision with progress
 export async function provisionMinecraftJar(
   version: string,
   destinationPath: string,
+  onProgress?: (msg: string) => void,
 ): Promise<void> {
+  onProgress?.(`Resolving Minecraft ${version}...`);
   const jarUrl = await getServerJarUrl(version);
 
-  const jarResponse = await fetch(jarUrl);
-  const jarBuffer = await jarResponse.arrayBuffer();
+  const res = await fetch(jarUrl);
+  if (!res.ok || !res.body) throw new Error(`Download failed (${res.status})`);
+
+  const total = Number(res.headers.get('content-length')) || 0;
+  const chunks: Buffer[] = [];
+  let received = 0;
+  let lastStep = -1;
+
+  for await (const chunk of res.body as unknown as AsyncIterable<Uint8Array>) {
+    chunks.push(Buffer.from(chunk));
+    received += chunk.length;
+    if (total) {
+      const step = Math.floor((received / total) * 10);
+      if (step > lastStep) {
+        lastStep = step;
+        onProgress?.(`Downloading server jar... ${step * 10}%`);
+      }
+    }
+  }
 
   mkdirSync(path.dirname(destinationPath), { recursive: true });
-  writeFileSync(destinationPath, Buffer.from(jarBuffer));
+  writeFileSync(destinationPath, Buffer.concat(chunks));
 }

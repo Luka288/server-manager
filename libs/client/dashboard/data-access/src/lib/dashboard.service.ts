@@ -1,6 +1,10 @@
 import { inject, Service, signal } from '@angular/core';
 import { CreateServerForm, Server } from '@game-server/client/types';
-import { ApiService, StateService } from '@game-server/client/shared';
+import {
+  ApiService,
+  FolderService,
+  StateService,
+} from '@game-server/client/shared';
 import { filter, finalize, map, switchMap, tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
 
@@ -9,6 +13,7 @@ export class DashboardService {
   private readonly ApiService = inject(ApiService);
   private readonly socketService = inject(SocketService);
   private readonly stateService = inject(StateService);
+  private readonly folderService = inject(FolderService);
 
   readonly serverList = signal<Server[]>([]);
 
@@ -94,23 +99,13 @@ export class DashboardService {
     );
   }
 
-  selectPath() {
-    return this.ApiService.post<{ path: string }>('select-folder', {});
-  }
-
-  updateFolderPath(path: string, serverId: string) {
-    return this.ApiService.post<{ message: string; server: Server }>(
-      'update-folder-path',
-      {
-        path,
-        serverId,
-      },
-    ).pipe(
-      tap((res) => {
+  updatePath(serverId: string) {
+    return this.folderService.selectAndUpdateFolderPath(serverId).pipe(
+      tap((updated) => {
         this.serverList.update((servers) =>
           servers.map((server) =>
             server.id === serverId
-              ? { ...server, serverDirectory: res.server.serverDirectory }
+              ? { ...server, serverDirectory: updated.serverDirectory }
               : server,
           ),
         );
@@ -118,13 +113,37 @@ export class DashboardService {
     );
   }
 
-  selectAndUpdateFolderPath(serverId: string) {
-    return this.selectPath().pipe(
-      map(({ path }) => path),
-      filter((path): path is string => !!path),
-      switchMap((path) =>
-        this.updateFolderPath(path, serverId).pipe(map(() => path)),
-      ),
-    );
-  }
+  // selectPath() {
+  //   return this.ApiService.post<{ path: string }>('select-folder', {});
+  // }
+
+  // updateFolderPath(path: string, serverId: string) {
+  //   return this.ApiService.post<{ message: string; server: Server }>(
+  //     'update-folder-path',
+  //     {
+  //       path,
+  //       serverId,
+  //     },
+  //   ).pipe(
+  //     tap((res) => {
+  //       this.serverList.update((servers) =>
+  //         servers.map((server) =>
+  //           server.id === serverId
+  //             ? { ...server, serverDirectory: res.server.serverDirectory }
+  //             : server,
+  //         ),
+  //       );
+  //     }),
+  //   );
+  // }
+
+  // selectAndUpdateFolderPath(serverId: string) {
+  //   return this.selectPath().pipe(
+  //     map(({ path }) => path),
+  //     filter((path): path is string => !!path),
+  //     switchMap((path) =>
+  //       this.updateFolderPath(path, serverId).pipe(map(() => path)),
+  //     ),
+  //   );
+  // }
 }

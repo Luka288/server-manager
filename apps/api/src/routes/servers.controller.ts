@@ -24,6 +24,7 @@ function parseCreateBody(body: any): CreateServerInput {
     whitelist,
     onlineMode,
     worldSeed,
+    serverDirectory,
   } = body ?? {};
 
   if (typeof name !== 'string' || !name.trim()) {
@@ -50,6 +51,7 @@ function parseCreateBody(body: any): CreateServerInput {
     whitelist,
     onlineMode,
     worldSeed,
+    serverDirectory: requireString(serverDirectory, 'serverDirectory'),
   };
 }
 

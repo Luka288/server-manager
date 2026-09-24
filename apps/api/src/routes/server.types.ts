@@ -16,4 +16,5 @@ export type CreateServerInput = {
   memoryMb: number;
   jarFile?: string;
   version?: string;
+  serverDirectory?: string;
 } & ServerPropertiesInput;

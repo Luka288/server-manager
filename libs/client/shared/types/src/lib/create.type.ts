@@ -12,6 +12,7 @@ export interface CreateServerForm {
   onlineMode: boolean;
 
   worldSeed?: string;
+  serverDirectory: string;
 }
 
 export type Gamemode = 'survival' | 'creative' | 'adventure' | 'spectator';
