@@ -4,7 +4,8 @@ export type ServerStatus =
   | 'stopping'
   | 'starting'
   | 'crashed'
-  | 'provisioning';
+  | 'provisioning'
+  | 'restarting';
 
 export interface ServerStatusEvent {
   type: 'server-status';

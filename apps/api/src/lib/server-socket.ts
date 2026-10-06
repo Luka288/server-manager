@@ -12,6 +12,7 @@ export class ServerSocket {
   private readonly wss: WebSocketServer;
 
   private readonly subscriptions = new Map<WebSocket, Set<string>>();
+  private readonly lastStatus = new Map<string, string>();
 
   private readonly history = new Map<string, ServerSocketEvent[]>();
   private static readonly MAX_HISTORY = 1000;
@@ -32,11 +33,15 @@ export class ServerSocket {
 
   attachManager(serverId: string, manager: ServerManager): void {
     manager.on('statusChange', (status) => {
-      if (status === 'starting') {
-        this.history.set(serverId, []);
-      }
-
       this.broadcast({ type: 'server-status', serverId, status });
+
+      if (status === 'starting') {
+        this.pushConsole(serverId, {
+          type: 'console-output',
+          serverId,
+          data: `[${new Date().toLocaleTimeString()}] [ServerManager/INFO]: Server starting...\r\n`,
+        });
+      }
 
       if (status === 'stopped') {
         this.pushConsole(serverId, {

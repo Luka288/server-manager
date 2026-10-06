@@ -4,8 +4,6 @@ import {
   DestroyRef,
   effect,
   inject,
-  OnDestroy,
-  OnInit,
   signal,
   untracked,
 } from '@angular/core';
@@ -50,7 +48,6 @@ export class ClientTerminal {
   });
 
   readonly serverStatus = computed(() => {
-    console.log(this.server()?.status);
     return this.server()?.status;
   });
 
@@ -84,6 +81,13 @@ export class ClientTerminal {
   stopServer(id: string) {
     this.dashboardService
       .stop(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
+  restartServer(id: string) {
+    this.dashboardService
+      .restart(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }

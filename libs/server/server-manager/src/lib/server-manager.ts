@@ -17,6 +17,9 @@ export class ServerManager extends EventEmitter {
     this.serverManagerOptions = options;
   }
 
+  private restartPending = false;
+  private intentionalStop = false;
+
   private setStatus(status: ServerStatus): void {
     this.serverStatus = status;
     this.emit('statusChange', this.serverStatus);
@@ -32,10 +35,16 @@ export class ServerManager extends EventEmitter {
   }
 
   start(): void {
-    if (this.isRunning() || this.isStarting()) {
-      throw new Error('Server is already running or starting!');
+    if (
+      this.isRunning() ||
+      this.isStarting() ||
+      this.serverStatus === 'stopping' ||
+      this.serverStatus === 'restarting'
+    ) {
+      throw new Error('Server is already running, starting or restarting!');
     }
 
+    this.intentionalStop = false;
     this.setStatus('starting');
     mkdirSync(this.serverManagerOptions.cwd, { recursive: true });
     writeFileSync(`${this.serverManagerOptions.cwd}/eula.txt`, 'eula=true');
@@ -67,37 +76,66 @@ export class ServerManager extends EventEmitter {
       if (this.childProcess !== child) return;
 
       this.childProcess = null;
-      this.setStatus(
-        signal === 'SIGTERM' || code === 0 ? 'stopped' : 'crashed',
-      );
+      const clean = this.intentionalStop || code === 0 || signal === 'SIGTERM';
+      this.intentionalStop = false;
+      this.setStatus(clean ? 'stopped' : 'crashed');
       this.emit('exit', code);
+
+      const shouldRestart = this.restartPending;
+      this.restartPending = false;
+
+      if (shouldRestart && clean) {
+        try {
+          this.start();
+        } catch (err) {
+          this.setStatus('crashed');
+          this.emit('stderr', `Restart failed: ${(err as Error).message}`);
+        }
+      }
     });
 
     child.on('error', (err) => {
       if (this.childProcess !== child) return;
 
       this.childProcess = null;
+      this.restartPending = false;
       this.setStatus('crashed');
       this.emit('stderr', `Process error: ${err.message}`);
     });
   }
 
   stop(): void {
-    if (!this.isRunning()) {
-      throw new Error('Server is not running');
-    }
+    if (!this.isRunning()) throw new Error('Server is not running');
 
+    const child = this.childProcess;
+    this.intentionalStop = true;
     this.setStatus('stopping');
-    this.childProcess?.kill();
+
+    child?.stdin?.write('stop\n');
+
+    setTimeout(() => {
+      if (this.childProcess === child) child?.kill();
+    }, 15_000).unref();
   }
 
   restart(): void {
-    if (this.isRunning()) {
-      this.once('exit', () => this.start());
-      this.stop();
-    } else {
-      this.start();
+    if (
+      this.isStarting() ||
+      this.restartPending ||
+      this.serverStatus === 'stopping' ||
+      this.serverStatus === 'restarting'
+    ) {
+      throw new Error('Server is busy, try again in a moment');
     }
+
+    if (!this.isRunning()) {
+      this.start();
+      return;
+    }
+
+    this.restartPending = true;
+    this.stop();
+    this.setStatus('restarting');
   }
 
   sendCommand(command: string): void {

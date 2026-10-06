@@ -78,7 +78,6 @@ export class ServersService {
       name,
     });
 
-    console.log('writeServerProperties args:', { directory, properties });
     writeServerProperties(directory, properties);
 
     const server = this.registry.create(id, { ...command, name });
@@ -154,9 +153,10 @@ export class ServersService {
 
   async remove(id: string) {
     const manager = this.getManager(id);
+    const status = manager.getStatus();
 
-    if (manager.getStatus() === 'running') {
-      throw new HttpError(403, 'Cannot remove running server');
+    if (status !== 'stopped' && status !== 'crashed') {
+      throw new HttpError(403, 'Cannot remove a server that is not stopped');
     }
 
     this.registry.delete(id);

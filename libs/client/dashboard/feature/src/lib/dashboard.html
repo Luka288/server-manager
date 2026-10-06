@@ -65,8 +65,13 @@
             >
               Stop
             </button>
-            <button class="btn-restart" aria-label="Restart">
+            <button
+              class="btn-restart"
+              aria-label="Restart"
+              (click)="restartServer(server.id); $event.stopPropagation()"
+            >
               <i class="ti ti-refresh"></i>
+              Restart
             </button>
             }@else if (server.status === 'crashed') {
             <button

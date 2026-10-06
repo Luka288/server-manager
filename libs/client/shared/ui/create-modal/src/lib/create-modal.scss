@@ -151,4 +151,15 @@
     @include mixin.button-variant(variable.$accent-blue);
     padding: 9px 16px;
   }
+
+  .close-btn {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    cursor: pointer;
+
+    i {
+      color: white;
+    }
+  }
 }

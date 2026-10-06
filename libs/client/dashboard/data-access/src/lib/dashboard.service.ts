@@ -5,7 +5,7 @@ import {
   FolderService,
   StateService,
 } from '@game-server/client/shared';
-import { filter, finalize, map, switchMap, tap } from 'rxjs';
+import { finalize, tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
 
 @Service()
@@ -46,9 +46,6 @@ export class DashboardService {
     );
   }
 
-  /* 
-    TODO: must add state to track when the server is creating
-  */
   create(payload: CreateServerForm) {
     this.stateService.serverCreationState.set(true);
 
@@ -77,6 +74,18 @@ export class DashboardService {
 
   stop(id: string) {
     return this.ApiService.post<Server>(`${id}/stop`, {}).pipe(
+      tap((res) => {
+        this.serverList.update((servers) =>
+          servers.map((server) =>
+            server.id === res.id ? { ...server, status: res.status } : server,
+          ),
+        );
+      }),
+    );
+  }
+
+  restart(serverId: string) {
+    return this.ApiService.post<Server>(`${serverId}/restart`, {}).pipe(
       tap((res) => {
         this.serverList.update((servers) =>
           servers.map((server) =>

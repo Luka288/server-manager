@@ -12,7 +12,7 @@
         aria-label="Close"
         (click)="close()"
       >
-        <i class="ti ti-x"></i>
+        <i class="fa-solid fa-x"></i>
       </button>
     </div>
 
@@ -57,7 +57,10 @@
             (click)="locatePath(); $event.stopImmediatePropagation()"
           >
             <i class="ti ti-folder"></i>
-            <span class="btn-path-text">{{ 'Example path D:\\Games' }}</span>
+            <span class="btn-path-text"
+              >{{ serverFormModel().serverDirectory || 'Example path D:\\Games'
+              }}</span
+            >
           </button>
         </div>
 

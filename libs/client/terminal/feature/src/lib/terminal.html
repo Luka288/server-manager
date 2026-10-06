@@ -8,16 +8,8 @@
 
       <div class="terminal-actions">
         <div class="terminal-status">
-          @if (serverStatus() === 'running') {
           <span class="status-dot"></span>
-          <span>Running</span>
-          } @else if(serverStatus() === 'starting') {
-          <span class="status-dot starting"></span>
-          <span>Starting</span>
-          } @else {
-          <span class="status-dot stopped"></span>
-          <span>Stopped</span>
-          }
+          <span [class]="serverStatus()">{{serverStatus()}}</span>
         </div>
 
         @if (serverStatus() === 'running') {
@@ -30,7 +22,11 @@
           <span>Stop</span>
         </button>
 
-        <button class="terminal-button restart-button" type="button">
+        <button
+          class="terminal-button restart-button"
+          type="button"
+          (click)="restartServer(server()!.id); $event.stopPropagation()"
+        >
           ↻
           <span>Restart</span>
         </button>
