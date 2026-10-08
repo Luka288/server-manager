@@ -20,3 +20,14 @@ export interface ServerDetail extends Server {
   connectAddress: string;
   note: string;
 }
+
+export interface ConnectionInfo {
+  id: string;
+  name: string;
+  ip: string;
+  localIp: string;
+  port: string;
+  connectionAddress: string;
+  localAddress: string;
+  note: string;
+}

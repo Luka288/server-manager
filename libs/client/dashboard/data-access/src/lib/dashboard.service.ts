@@ -1,11 +1,15 @@
 import { inject, Service, signal } from '@angular/core';
-import { CreateServerForm, Server } from '@game-server/client/types';
+import {
+  ConnectionInfo,
+  CreateServerForm,
+  Server,
+} from '@game-server/client/types';
 import {
   ApiService,
   FolderService,
   StateService,
 } from '@game-server/client/shared';
-import { finalize, tap } from 'rxjs';
+import { finalize, map, of, switchMap, tap } from 'rxjs';
 import { SocketService } from '@game-server/client/shared';
 
 @Service()
@@ -16,6 +20,7 @@ export class DashboardService {
   private readonly folderService = inject(FolderService);
 
   readonly serverList = signal<Server[]>([]);
+  readonly connectionInfo = signal<ConnectionInfo | null>(null);
 
   constructor() {
     this.socketService.connect();
@@ -62,12 +67,19 @@ export class DashboardService {
 
   start(id: string) {
     return this.ApiService.post<Server>(`${id}/start`, {}).pipe(
-      tap((res) => {
+      tap((server) => {
         this.serverList.update((servers) =>
-          servers.map((server) =>
-            server.id === res.id ? { ...server, status: res.status } : server,
+          servers.map((item) =>
+            item.id === server.id ? { ...item, status: server.status } : item,
           ),
         );
+      }),
+      switchMap((server) => {
+        // if (server.status !== 'running') {
+        //   return of(server);
+        // }
+
+        return this.getConnectionInfo(server.id).pipe(map(() => server));
       }),
     );
   }
@@ -80,6 +92,8 @@ export class DashboardService {
             server.id === res.id ? { ...server, status: res.status } : server,
           ),
         );
+
+        this.connectionInfo.set(null);
       }),
     );
   }
@@ -122,37 +136,11 @@ export class DashboardService {
     );
   }
 
-  // selectPath() {
-  //   return this.ApiService.post<{ path: string }>('select-folder', {});
-  // }
-
-  // updateFolderPath(path: string, serverId: string) {
-  //   return this.ApiService.post<{ message: string; server: Server }>(
-  //     'update-folder-path',
-  //     {
-  //       path,
-  //       serverId,
-  //     },
-  //   ).pipe(
-  //     tap((res) => {
-  //       this.serverList.update((servers) =>
-  //         servers.map((server) =>
-  //           server.id === serverId
-  //             ? { ...server, serverDirectory: res.server.serverDirectory }
-  //             : server,
-  //         ),
-  //       );
-  //     }),
-  //   );
-  // }
-
-  // selectAndUpdateFolderPath(serverId: string) {
-  //   return this.selectPath().pipe(
-  //     map(({ path }) => path),
-  //     filter((path): path is string => !!path),
-  //     switchMap((path) =>
-  //       this.updateFolderPath(path, serverId).pipe(map(() => path)),
-  //     ),
-  //   );
-  // }
+  getConnectionInfo(serverId: string) {
+    return this.ApiService.get<ConnectionInfo>(`${serverId}`).pipe(
+      tap((info) => {
+        this.connectionInfo.set(info);
+      }),
+    );
+  }
 }

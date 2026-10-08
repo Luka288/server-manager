@@ -6,6 +6,13 @@
         {{ servers().length }} total, {{ runningServers() }} running
       </p>
     </div>
+
+    @if(connection()) {
+    <div class="ip-container">
+      <h1>Server runs at {{connectionInfo()?.localAddress}}</h1>
+    </div>
+    }
+
     <div class="actions">
       <button class="btn-create" (click)="openCreate()">
         <i class="ti ti-plus"></i>

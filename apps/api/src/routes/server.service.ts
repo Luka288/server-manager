@@ -10,6 +10,7 @@ import { getPublicIp, getServerPort } from './../lib/public-ip';
 import { tryClosePort, tryOpenPort } from './../lib/port-forwarding';
 import { HttpError } from './../lib/http-error';
 import { serversRepository } from './server.repository';
+import { getLocalIp } from './../lib/local-ip';
 import type {
   CreateServerInput,
   OnServerCreated,
@@ -45,14 +46,17 @@ export class ServersService {
 
     const ip = await getPublicIp();
     const port = getServerPort(row.serverDirectory);
+    const localIp = getLocalIp();
 
     return {
       id,
       name: manager.getName(),
       status: manager.getStatus(),
       ip,
+      localIp,
       port,
       connectAddress: `${ip}:${port}`,
+      localAddress: localIp ? `${localIp}:${port}` : null,
       note: CONNECT_NOTE,
     };
   }

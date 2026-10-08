@@ -132,10 +132,10 @@ export class ServerManager extends EventEmitter {
       this.start();
       return;
     }
+    this.setStatus('restarting');
 
     this.restartPending = true;
     this.stop();
-    this.setStatus('restarting');
   }
 
   sendCommand(command: string): void {

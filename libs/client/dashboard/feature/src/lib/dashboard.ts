@@ -12,9 +12,14 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateModal } from '@game-server/client/shared/ui/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
-import { StateService, ToastService } from '@game-server/client/shared';
+import {
+  ModalService,
+  StateService,
+  ToastService,
+} from '@game-server/client/shared';
 import { ReactiveFormsModule } from '@angular/forms';
-import { form, FormField, required } from '@angular/forms/signals';
+import { form, required } from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 
 export interface FolderSearchModel {
   path: string;
@@ -33,14 +38,11 @@ export class Dashboard implements OnInit {
   private readonly router = inject(Router);
   private readonly dialogRef = inject(MatDialog);
   private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(ModalService);
   readonly stateService = inject(StateService);
 
-  /*
-    manual subscribtions must be changed
-  */
-
   readonly searchModel = signal<FolderSearchModel>({
-    path: '', // new folder path that will be sent to backend and will be rewritten to servers path
+    path: '',
     serverId: '',
   });
   readonly FolderPathForm = form(this.searchModel, (path) => {
@@ -48,14 +50,19 @@ export class Dashboard implements OnInit {
   });
 
   readonly servers = this.dashboardService.serverList;
-
-  // readonly servers = toSignal(this.dashboardService.getServerList(), {
-  //   initialValue: [] as Server[],
-  // });
+  readonly connectionInfo = this.dashboardService.connectionInfo;
 
   readonly runningServers = computed(() => {
     return this.servers().filter((server) => server.status === 'running')
       .length;
+  });
+
+  readonly connection = computed(() => {
+    const hasRunningServer = this.servers().some(
+      (server) => server.status === 'running',
+    );
+
+    return hasRunningServer ? this.connectionInfo() : null;
   });
 
   ngOnInit(): void {
@@ -65,35 +72,29 @@ export class Dashboard implements OnInit {
       .subscribe();
   }
 
-  openCreate(): void {
-    const dialog = this.dialogRef.open(CreateModal);
+  async openCreate() {
+    const formData =
+      await this.modalService.open<CreateServerForm>(CreateModal);
+    if (!formData) return; // user cancelled
 
-    dialog.afterClosed().subscribe((formData) => {
-      if (!formData) {
-        return;
-      }
-
-      this.createServer(formData);
-    });
+    await this.createServer(formData);
   }
 
-  createServer(payload: CreateServerForm) {
+  async createServer(payload: CreateServerForm) {
     const toastId = this.toastService.show('loading', 'Creating server...');
 
-    this.dashboardService.create(payload).subscribe({
-      next: () => {
-        this.toastService.dismiss(toastId);
-        this.toastService.show('success', 'Server created!', {
-          autoCloseMs: 3000,
-        });
-      },
-      error: () => {
-        this.toastService.dismiss(toastId);
-        this.toastService.show('error', 'Failed to create server.', {
-          autoCloseMs: 4000,
-        });
-      },
-    });
+    try {
+      await firstValueFrom(this.dashboardService.create(payload));
+      this.toastService.show('success', 'Server created!', {
+        autoCloseMs: 3000,
+      });
+    } catch {
+      this.toastService.show('error', 'Failed to create server.', {
+        autoCloseMs: 4000,
+      });
+    } finally {
+      this.toastService.dismiss(toastId);
+    }
   }
 
   locatePath(serverId: string): void {
@@ -120,7 +121,7 @@ export class Dashboard implements OnInit {
     this.dashboardService
       .start(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+      .subscribe(console.log);
   }
 
   stopServer(id: string): void {
