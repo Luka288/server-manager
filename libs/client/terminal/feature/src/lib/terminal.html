@@ -34,7 +34,7 @@
         <button
           class="terminal-button stop-button"
           type="button"
-          (click)="startServer(serverId()!)"
+          (click)="stopServer(serverId()!); $event.stopPropagation()"
         >
           ▶
           <span>Stop</span>

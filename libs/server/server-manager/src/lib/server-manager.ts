@@ -41,6 +41,7 @@ export class ServerManager extends EventEmitter {
 
     this.intentionalStop = false;
     this.setStatus('starting');
+
     mkdirSync(this.serverManagerOptions.cwd, { recursive: true });
     writeFileSync(`${this.serverManagerOptions.cwd}/eula.txt`, 'eula=true');
 
@@ -49,6 +50,7 @@ export class ServerManager extends EventEmitter {
       this.serverManagerOptions.args,
       { cwd: this.serverManagerOptions.cwd, stdio: ['pipe', 'pipe', 'pipe'] },
     );
+
     this.childProcess = child;
 
     child.stdout?.on('data', (data: Buffer) => {
@@ -71,12 +73,17 @@ export class ServerManager extends EventEmitter {
       if (this.childProcess !== child) return;
 
       this.childProcess = null;
+
       const clean = this.intentionalStop || code === 0 || signal === 'SIGTERM';
+
       this.intentionalStop = false;
+
       this.setStatus(clean ? 'stopped' : 'crashed');
+
       this.emit('exit', code);
 
       const shouldRestart = this.restartPending;
+
       this.restartPending = false;
 
       if (shouldRestart && clean) {
@@ -103,6 +110,7 @@ export class ServerManager extends EventEmitter {
     if (!this.isRunning() && !this.isStarting()) {
       throw new Error('Server is not running');
     }
+
     this.requestStop();
   }
 
