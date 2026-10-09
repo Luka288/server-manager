@@ -66,6 +66,9 @@
       ],
       "@game-server/server/selectfolder": [
         "./libs/server/select-folder/src/index.ts"
+      ],
+      "@game-server/shared/ui/confirmationModal": [
+        "./libs/client/shared/ui/confirmation-modal/src/index.ts"
       ]
     }
   },

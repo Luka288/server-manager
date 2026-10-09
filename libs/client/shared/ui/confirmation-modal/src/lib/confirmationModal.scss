@@ -1,0 +1,81 @@
+@use 'variables' as variable;
+@use 'mixins' as mixin;
+
+.backdrop {
+  @include mixin.backdrop();
+
+  .confirmation-modal {
+    max-width: 500px;
+    width: 100%;
+    height: 250px;
+    background: variable.$bg-card;
+    box-sizing: border-box;
+    padding: 10px;
+    color: variable.$text-muted;
+    @include mixin.flex($dir: column, $justify: space-around);
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+
+    .disclaimer {
+      text-align: center;
+      font-family: variable.$font-family;
+
+      &.WARN {
+        animation: shake 0.4s 0.2s ease-in-out;
+
+        h2 {
+          color: variable.$warn-title;
+        }
+
+        p {
+          color: variable.$text-warn;
+        }
+      }
+    }
+
+    .actions {
+      width: 100%;
+      @include mixin.flex($justify: center, $align: center, $gap: 15px);
+
+      .confirm {
+        width: 120px;
+        text-align: center;
+        @include mixin.button-variant(variable.$accent-blue, $justify: center);
+        padding: 9px 16px;
+      }
+
+      .refuse {
+        width: 120px;
+        @include mixin.button-variant(variable.$color-red, $justify: center);
+        padding: 9px 16px;
+      }
+    }
+  }
+
+  .transparent-dialog {
+    .mat-mdc-dialog-surface {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}

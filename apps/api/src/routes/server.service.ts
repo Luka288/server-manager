@@ -11,12 +11,15 @@ import { tryClosePort, tryOpenPort } from './../lib/port-forwarding';
 import { HttpError } from './../lib/http-error';
 import { serversRepository } from './server.repository';
 import { getLocalIp } from './../lib/local-ip';
+import { rm } from 'node:fs/promises';
+
 import type {
   CreateServerInput,
   OnServerCreated,
   ServerManager,
 } from './server.types';
 import path from 'node:path';
+import os from 'node:os';
 
 const SERVERS_ROOT = './servers';
 const DEFAULT_JAR_FILE = 'server.jar';
@@ -163,10 +166,29 @@ export class ServersService {
       throw new HttpError(403, 'Cannot remove a server that is not stopped');
     }
 
+    const server = await serversRepository.findById(id);
+    if (!server) throw new HttpError(404, 'Server not found');
+
+    await this.deleteFromLocalMachine(server.serverDirectory);
+
     this.registry.delete(id);
     await serversRepository.delete(id);
 
     return { id, deleted: true };
+  }
+
+  async deleteFromLocalMachine(dir: string) {
+    const resolved = path.resolve(dir);
+
+    if (resolved === path.parse(resolved).root || resolved === os.homedir()) {
+      throw new HttpError(400, 'Refusing to delete an unsafe directory');
+    }
+
+    return rm(resolved, {
+      recursive: true,
+      force: true,
+      maxRetries: 3,
+    });
   }
 
   async updateFolderPath(id: string, path: string) {

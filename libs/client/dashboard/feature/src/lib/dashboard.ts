@@ -9,7 +9,6 @@ import {
 import { DashboardService } from '@game-server/dashboard-data-access';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { CreateModal } from '@game-server/client/shared/ui/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
 import {
@@ -20,6 +19,7 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { form, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
+import { ConfirmationModal } from '@game-server/shared/ui/confirmationModal';
 
 export interface FolderSearchModel {
   path: string;
@@ -36,7 +36,6 @@ export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
-  private readonly dialogRef = inject(MatDialog);
   private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
   readonly stateService = inject(StateService);
@@ -78,6 +77,29 @@ export class Dashboard implements OnInit {
     if (!formData) return; // user cancelled
 
     await this.createServer(formData);
+  }
+
+  async deleteServer(id: string) {
+    const confirmation = await this.modalService.open<boolean>(
+      ConfirmationModal,
+      {
+        panelClass: 'transparent-dialog',
+        data: {
+          title: 'Delete server?',
+          message: 'This will also delete the server files from your computer.',
+          confirmText: 'Delete',
+          refuseText: 'Cancel',
+          textClass: 'WARN',
+        },
+      },
+    );
+
+    if (!confirmation) return;
+
+    this.dashboardService
+      .delete(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   async createServer(payload: CreateServerForm) {
@@ -127,13 +149,6 @@ export class Dashboard implements OnInit {
   stopServer(id: string): void {
     this.dashboardService
       .stop(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
-  }
-
-  deleteServer(id: string) {
-    this.dashboardService
-      .delete(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }

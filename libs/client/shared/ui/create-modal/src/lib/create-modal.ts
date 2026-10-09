@@ -1,4 +1,4 @@
-import { Component, inject, model, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CreateServerForm } from '@game-server/client/types';
 import { MatDialogRef } from '@angular/material/dialog';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -30,7 +30,7 @@ export class CreateModal {
     whitelist: 'false', //done
     onlineMode: false, // allows none official minecraft users to join server (can be changed by user)
     worldSeed: '', // done
-    serverDirectory: '',
+    serverDirectory: '', // done
   });
 
   readonly serverForm = form(this.serverFormModel, (path) => {

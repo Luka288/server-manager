@@ -1,0 +1,17 @@
+<div class="backdrop">
+  <div class="confirmation-modal">
+    <div class="disclaimer" [class]="data.textClass">
+      <h2>{{ data.title }}</h2>
+      <p>{{ data.message }}</p>
+    </div>
+
+    <div class="actions">
+      <button class="confirm" (click)="confirm()" [disabled]="disabled()">
+        {{disabled() ? secondsLeft() : (data.confirmText ?? "Yes")}}
+      </button>
+      <button class="refuse" (click)="refuse()">
+        {{data.refuseText ?? 'No'}}
+      </button>
+    </div>
+  </div>
+</div>
