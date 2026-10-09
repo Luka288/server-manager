@@ -35,12 +35,7 @@ export class ServerManager extends EventEmitter {
   }
 
   start(): void {
-    if (
-      this.isRunning() ||
-      this.isStarting() ||
-      this.serverStatus === 'stopping' ||
-      this.serverStatus === 'restarting'
-    ) {
+    if (this.childProcess) {
       throw new Error('Server is already running, starting or restarting!');
     }
 
@@ -62,7 +57,7 @@ export class ServerManager extends EventEmitter {
       const output = data.toString();
       this.emit('stdout', output);
 
-      if (output.includes('Done (')) {
+      if (output.includes('Done (') && this.serverStatus === 'starting') {
         this.setStatus('running');
       }
     });
@@ -105,37 +100,55 @@ export class ServerManager extends EventEmitter {
   }
 
   stop(): void {
-    if (!this.isRunning()) throw new Error('Server is not running');
-
-    const child = this.childProcess;
-    this.intentionalStop = true;
-    this.setStatus('stopping');
-
-    child?.stdin?.write('stop\n');
-
-    setTimeout(() => {
-      if (this.childProcess === child) child?.kill();
-    }, 15_000).unref();
+    if (!this.isRunning() && !this.isStarting()) {
+      throw new Error('Server is not running');
+    }
+    this.requestStop();
   }
 
   restart(): void {
     if (
-      this.isStarting() ||
       this.restartPending ||
+      this.serverStatus === 'starting' ||
       this.serverStatus === 'stopping' ||
       this.serverStatus === 'restarting'
     ) {
       throw new Error('Server is busy, try again in a moment');
     }
 
-    if (!this.isRunning()) {
+    if (!this.childProcess) {
       this.start();
       return;
     }
-    this.setStatus('restarting');
 
     this.restartPending = true;
-    this.stop();
+    this.setStatus('restarting');
+    this.requestStop();
+  }
+
+  private requestStop(): void {
+    const child = this.childProcess;
+
+    if (!child) {
+      this.restartPending = false;
+      this.setStatus('stopped');
+      return;
+    }
+
+    this.intentionalStop = true;
+    if (!this.restartPending) this.setStatus('stopping');
+
+    console.log(`[${this.serverManagerOptions.name}] sending stop`);
+    child.stdin?.write('stop\n');
+
+    setTimeout(() => {
+      if (this.childProcess === child) {
+        console.log(
+          `[${this.serverManagerOptions.name}] stop timed out, killing`,
+        );
+        child.kill();
+      }
+    }, 15_000).unref();
   }
 
   sendCommand(command: string): void {
