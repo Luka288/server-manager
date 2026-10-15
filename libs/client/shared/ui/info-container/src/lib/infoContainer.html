@@ -1,0 +1,27 @@
+<div class="modal-backdrop">
+  <div class="info-container">
+    <h3>{{ ModalData.title }}</h3>
+
+    @for (row of ModalData.rows; track row.label) {
+    <div class="row">
+      <div>
+        <p class="label">{{ row.label }}</p>
+        <p class="value">{{ row.value }}</p>
+      </div>
+      @if (row.copyable) {
+      <button (click)="copy(row)" [attr.aria-label]="'Copy ' + row.label">
+        <i
+          class="ti"
+          [class]="copiedKey() === row.label ? 'ti-check' : 'ti-copy'"
+        ></i>
+        {{ copiedKey() === row.label ? 'Copied!' : 'Copy' }}
+      </button>
+      }
+    </div>
+    } @if (ModalData.note) {
+    <small>{{ ModalData.note }}</small>
+    }
+
+    <button (click)="close()">{{ ModalData.closeText ?? 'Done' }}</button>
+  </div>
+</div>

@@ -20,6 +20,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { form, required } from '@angular/forms/signals';
 import { firstValueFrom } from 'rxjs';
 import { ConfirmationModal } from '@game-server/shared/ui/confirmationModal';
+import {
+  InfoContainer,
+  InfoModalData,
+} from '@game-server/client/shared/infoContainer';
+import { rxResource } from '@angular/core/rxjs-interop';
 
 export interface FolderSearchModel {
   path: string;
@@ -28,7 +33,7 @@ export interface FolderSearchModel {
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, InfoContainer],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -51,17 +56,17 @@ export class Dashboard implements OnInit {
   readonly servers = this.dashboardService.serverList;
   readonly connectionInfo = this.dashboardService.connectionInfo;
 
-  readonly runningServers = computed(() => {
-    return this.servers().filter((server) => server.status === 'running')
-      .length;
-  });
+  readonly runningServer = computed(() =>
+    this.servers().find((s) => s.status === 'running'),
+  );
 
-  readonly connection = computed(() => {
-    const hasRunningServer = this.servers().some(
-      (server) => server.status === 'running',
-    );
+  readonly runningCount = computed(
+    () => this.servers().filter((s) => s.status === 'running').length,
+  );
 
-    return hasRunningServer ? this.connectionInfo() : null;
+  readonly connection = rxResource({
+    params: () => this.runningServer()?.id,
+    stream: ({ params: id }) => this.dashboardService.getConnectionInfo(id),
   });
 
   ngOnInit(): void {
@@ -100,6 +105,27 @@ export class Dashboard implements OnInit {
       .delete(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+  }
+
+  openConnect(): void {
+    const info = this.connection.value();
+    if (!info) return;
+
+    this.modalService.open(InfoContainer, {
+      panelClass: 'transparent-dialog',
+      data: {
+        title: 'How to connect',
+        rows: [
+          { label: 'Local address', value: info.localAddress, copyable: true },
+          {
+            label: 'Public address (Port forwarding needed!)',
+            value: info.connectAddress,
+            copyable: true,
+          },
+        ],
+        note: info.note,
+      } satisfies InfoModalData,
+    });
   }
 
   async createServer(payload: CreateServerForm) {

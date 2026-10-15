@@ -3,15 +3,9 @@
     <div>
       <h1>Servers</h1>
       <p class="subtitle">
-        {{ servers().length }} total, {{ runningServers() }} running
+        {{ servers().length }} total, {{ runningCount() }} running
       </p>
     </div>
-
-    @if(connection()) {
-    <div class="ip-container">
-      <h1>Server runs at {{connectionInfo()?.localAddress}}</h1>
-    </div>
-    }
 
     <div class="actions">
       <button class="btn-create" (click)="openCreate()">
@@ -28,7 +22,7 @@
     </div>
     <div class="stat-card">
       <p class="stat-label">Running now</p>
-      <p class="stat-value stat-running">{{ runningServers() }}</p>
+      <p class="stat-value stat-running">{{ runningCount() }}</p>
     </div>
   </div>
 
@@ -65,7 +59,24 @@
           <td class="muted">{{ server.serverDirectory }}</td>
 
           <td class="actions">
-            @if (server.status === 'running') {
+            @if (server.status === 'running') { @if(connectionInfo() &&
+            runningCount()) {
+            <button
+              class="btn-basic"
+              (click)="$event.stopImmediatePropagation(); openConnect()"
+            >
+              How to connect
+            </button>
+            <!-- <app-info-container informationTitle="How to connect">
+      <p>Local address: {{ connectionInfo()?.localAddress }}</p>
+      <p>
+        Public address (port forwarding needed): {{
+        connectionInfo()?.connectAddress }}
+      </p>
+      <small>{{ connectionInfo()?.note }}</small>
+    </app-info-container> -->
+            }
+
             <button
               class="btn-stop"
               (click)="stopServer(server.id); $event.stopPropagation()"

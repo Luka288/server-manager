@@ -27,7 +27,7 @@ export interface ConnectionInfo {
   ip: string;
   localIp: string;
   port: string;
-  connectionAddress: string;
+  connectAddress: string;
   localAddress: string;
   note: string;
 }

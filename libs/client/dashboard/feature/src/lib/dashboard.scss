@@ -76,7 +76,7 @@
         margin: 0;
 
         &.stat-running {
-          color: variable.$btn-action-bg;
+          color: variable.$status-running-text;
         }
       }
     }
@@ -180,6 +180,11 @@
             &:hover {
               background-color: rgba(248, 113, 113, 0.2);
             }
+          }
+
+          .btn-basic {
+            @include mixin.button-variant-solid(#2563eb);
+            margin-right: 10px;
           }
         }
       }

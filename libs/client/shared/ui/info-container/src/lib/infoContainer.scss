@@ -1,0 +1,89 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+:host {
+  display: block;
+}
+
+.modal-backdrop {
+  @include backdrop();
+}
+
+.info-container {
+  @include flex($dir: column, $gap: 4px);
+  width: min(400px, 90vw);
+  padding: 20px;
+  background: $bg-card;
+  border: 1px solid rgba($text-white, 0.08);
+  border-radius: 12px;
+  font-family: $font-family;
+  color: $text-primary;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-white;
+  }
+
+  .row {
+    @include flex($justify: space-between, $align: center, $gap: 12px);
+    padding: 12px 0;
+    border-top: 1px solid rgba($text-white, 0.06);
+
+    > div {
+      min-width: 0;
+    }
+  }
+
+  .label {
+    margin: 0 0 2px;
+    font-size: 12px;
+    color: $text-secondary;
+  }
+
+  .value {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-white;
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+
+  .row button {
+    @include icon-button;
+    flex-shrink: 0;
+
+    i {
+      font-size: 16px;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($btn-primary-bg, 0.25);
+    }
+  }
+
+  small {
+    display: block;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid rgba($text-white, 0.06);
+    font-size: 12px;
+    line-height: 1.5;
+    color: $text-muted;
+  }
+
+  button {
+    @include button-variant($btn-primary-bg, center);
+    align-self: flex-end;
+    margin-top: 16px;
+    padding: 8px 18px;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($btn-primary-bg, 0.25);
+    }
+  }
+}

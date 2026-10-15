@@ -69,6 +69,9 @@
       ],
       "@game-server/shared/ui/confirmationModal": [
         "./libs/client/shared/ui/confirmation-modal/src/index.ts"
+      ],
+      "@game-server/client/shared/infoContainer": [
+        "./libs/client/shared/ui/info-container/src/index.ts"
       ]
     }
   },

@@ -9,8 +9,8 @@ import {
   FolderService,
   StateService,
 } from '@game-server/client/shared';
-import { finalize, map, of, switchMap, tap } from 'rxjs';
-import { SocketService } from '@game-server/client/shared';
+import { finalize, map, switchMap, tap } from 'rxjs';
+import { SocketService, silentRequest } from '@game-server/client/shared';
 
 @Service()
 export class DashboardService {
@@ -66,7 +66,9 @@ export class DashboardService {
   }
 
   start(id: string) {
-    return this.ApiService.post<Server>(`${id}/start`, {}).pipe(
+    return this.ApiService.post<Server>(`${id}/start`, {
+      context: silentRequest(),
+    }).pipe(
       tap((server) => {
         this.serverList.update((servers) =>
           servers.map((item) =>
@@ -75,17 +77,15 @@ export class DashboardService {
         );
       }),
       switchMap((server) => {
-        // if (server.status !== 'running') {
-        //   return of(server);
-        // }
-
         return this.getConnectionInfo(server.id).pipe(map(() => server));
       }),
     );
   }
 
   stop(id: string) {
-    return this.ApiService.post<Server>(`${id}/stop`, {}).pipe(
+    return this.ApiService.post<Server>(`${id}/stop`, {
+      context: silentRequest(),
+    }).pipe(
       tap((res) => {
         this.serverList.update((servers) =>
           servers.map((server) =>
@@ -99,7 +99,9 @@ export class DashboardService {
   }
 
   restart(serverId: string) {
-    return this.ApiService.post<Server>(`${serverId}/restart`, {}).pipe(
+    return this.ApiService.post<Server>(`${serverId}/restart`, {
+      context: silentRequest(),
+    }).pipe(
       tap((res) => {
         this.serverList.update((servers) =>
           servers.map((server) =>
@@ -113,6 +115,7 @@ export class DashboardService {
   delete(id: string) {
     return this.ApiService.delete<{ id: string; deleted: boolean }>(
       `${id}/delete`,
+      { context: silentRequest() },
     ).pipe(
       tap((res) => {
         this.serverList.update((servers) =>
