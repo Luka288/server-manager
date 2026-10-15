@@ -54,7 +54,7 @@
 
     <div class="terminal-content" scrollDirective>
       @for (cmd of terminalLines(); track $index) {
-      <p [class]="logClass(cmd.text)">{{ cmd.text }}</p>
+      <p [class]="cmd.consoleType">{{ cmd.text }}</p>
       }
     </div>
 

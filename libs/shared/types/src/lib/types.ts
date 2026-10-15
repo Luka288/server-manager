@@ -25,6 +25,12 @@ export interface ConsoleErrorEvent {
   data: string;
 }
 
+export interface ConsoleInfoEvent {
+  type: 'console-info';
+  serverId: string;
+  data: string;
+}
+
 export interface SubscribeEvent {
   type: 'subscribe';
   serverId: string;
@@ -44,7 +50,8 @@ export interface CommandEvent {
 export type ServerSocketEvent =
   | ServerStatusEvent
   | ConsoleOutputEvent
-  | ConsoleErrorEvent;
+  | ConsoleErrorEvent
+  | ConsoleInfoEvent;
 
 export type ClientSocketEvent =
   | SubscribeEvent

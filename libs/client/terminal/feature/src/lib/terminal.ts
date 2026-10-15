@@ -29,6 +29,8 @@ export class ClientTerminal {
 
   readonly logClass = logClass;
 
+  // TODO: INFINITY SCROLL FOR TERMINAL CONTENT
+
   readonly terminalModel = signal({ command: '' });
   readonly terminalForm = form(this.terminalModel, (path) => {
     required(path.command, { message: 'Command is empty' });

@@ -1,7 +1,9 @@
 import { inject, Service, signal } from '@angular/core';
 import { SocketService } from './socket.service';
+import { ConsoleInfoEvent, ServerSocketEvent } from '@game-server/shared/types';
 
 export interface ConsoleLine {
+  consoleType: ServerSocketEvent['type'];
   type: 'stdout' | 'stderr';
   text: string;
 }
@@ -22,31 +24,24 @@ export class ConsoleService {
         return;
       }
 
-      if (event.type === 'console-output') {
-        this.linesRecord.update((record) => ({
-          ...record,
-          [event.serverId]: [
-            ...(record[event.serverId] ?? []),
-            {
-              type: 'stdout',
-              text: event.data,
-            },
-          ],
-        }));
+      if (
+        event.type !== 'console-output' &&
+        event.type !== 'console-error' &&
+        event.type !== 'console-info'
+      ) {
+        return;
       }
 
-      if (event.type === 'console-error') {
-        this.linesRecord.update((record) => ({
-          ...record,
-          [event.serverId]: [
-            ...(record[event.serverId] ?? []),
-            {
-              type: 'stderr',
-              text: event.data,
-            },
-          ],
-        }));
-      }
+      const line: ConsoleLine = {
+        consoleType: event.type,
+        type: event.type === 'console-error' ? 'stderr' : 'stdout',
+        text: event.data,
+      };
+
+      this.linesRecord.update((record) => ({
+        ...record,
+        [event.serverId]: [...(record[event.serverId] ?? []), line],
+      }));
     });
   }
 

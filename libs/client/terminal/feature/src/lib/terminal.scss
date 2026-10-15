@@ -225,12 +225,16 @@
         background: rgba(255, 255, 255, 0.015);
       }
 
-      &.log-warning {
+      &.console-warn {
         color: variable.$status-warn;
       }
 
-      &.log-error {
+      &.console-error {
         color: variable.$status-error;
+      }
+
+      &.console-info {
+        color: variable.$status-running-text;
       }
     }
   }
