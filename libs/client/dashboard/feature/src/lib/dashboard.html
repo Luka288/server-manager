@@ -59,38 +59,35 @@
           <td class="muted">{{ server.serverDirectory }}</td>
 
           <td class="actions">
-            @if (server.status === 'running') { @if(connectionInfo() &&
-            runningCount()) {
+            @if (server.status === 'running') { @if(connection.hasValue()) {
             <button
               class="btn-basic"
               (click)="$event.stopImmediatePropagation(); openConnect()"
             >
               How to connect
             </button>
-            <!-- <app-info-container informationTitle="How to connect">
-      <p>Local address: {{ connectionInfo()?.localAddress }}</p>
-      <p>
-        Public address (port forwarding needed): {{
-        connectionInfo()?.connectAddress }}
-      </p>
-      <small>{{ connectionInfo()?.note }}</small>
-    </app-info-container> -->
+
             }
 
             <button
               class="btn-stop"
+              [disabled]="store.busyIds().includes(server.id)"
               (click)="stopServer(server.id); $event.stopPropagation()"
             >
-              Stop
+              {{ store.busyIds().includes(server.id) ? 'Stopping...' : 'Stop' }}
             </button>
+
             <button
               class="btn-restart"
               aria-label="Restart"
+              [disabled]="store.busyIds().includes(server.id)"
               (click)="restartServer(server.id); $event.stopPropagation()"
             >
               <i class="ti ti-refresh"></i>
-              Restart
+              {{ store.busyIds().includes(server.id) ? 'Restarting...' :
+              'Restart' }}
             </button>
+
             }@else if (server.status === 'crashed') {
             <button
               class="btn-start"
@@ -103,16 +100,20 @@
             } @else {
             <button
               class="btn-start"
+              [disabled]="store.busyIds().includes(server.id)"
               (click)="startServer(server.id); $event.stopPropagation()"
             >
-              Start
+              {{ store.busyIds().includes(server.id) ? 'Starting...' : 'Start'
+              }}
             </button>
 
             <button
               class="btn-delete"
+              [disabled]="store.busyIds().includes(server.id)"
               (click)="deleteServer(server.id); $event.stopPropagation()"
             >
-              Delete
+              {{ store.busyIds().includes(server.id) ? 'Deleting...' : 'Delete'
+              }}
             </button>
             }
           </td>

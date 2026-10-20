@@ -1,24 +1,14 @@
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { DashboardService } from '@game-server/dashboard-data-access';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+  DashboardService,
+  DashboardStore,
+} from '@game-server/dashboard-data-access';
 import { Router } from '@angular/router';
 import { CreateModal } from '@game-server/client/shared/ui/create-modal';
 import { CreateServerForm } from '@game-server/client/types';
-import {
-  ModalService,
-  StateService,
-  ToastService,
-} from '@game-server/client/shared';
+import { ModalService } from '@game-server/client/shared';
 import { ReactiveFormsModule } from '@angular/forms';
 import { form, required } from '@angular/forms/signals';
-import { firstValueFrom } from 'rxjs';
 import { ConfirmationModal } from '@game-server/shared/ui/confirmationModal';
 import {
   InfoContainer,
@@ -39,22 +29,16 @@ export interface FolderSearchModel {
 })
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
-  private readonly toastService = inject(ToastService);
   private readonly modalService = inject(ModalService);
-  readonly stateService = inject(StateService);
+  readonly store = inject(DashboardStore);
 
-  readonly searchModel = signal<FolderSearchModel>({
-    path: '',
-    serverId: '',
-  });
+  readonly searchModel = signal<FolderSearchModel>({ path: '', serverId: '' });
   readonly FolderPathForm = form(this.searchModel, (path) => {
     required(path.path);
   });
 
-  readonly servers = this.dashboardService.serverList;
-  readonly connectionInfo = this.dashboardService.connectionInfo;
+  readonly servers = this.store.servers;
 
   readonly runningServer = computed(() =>
     this.servers().find((s) => s.status === 'running'),
@@ -70,18 +54,16 @@ export class Dashboard implements OnInit {
   });
 
   ngOnInit(): void {
-    this.dashboardService
-      .getServerList()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.store.load();
   }
 
   async openCreate() {
     const formData =
       await this.modalService.open<CreateServerForm>(CreateModal);
-    if (!formData) return; // user cancelled
 
-    await this.createServer(formData);
+    if (!formData) return;
+
+    await this.store.create(formData);
   }
 
   async deleteServer(id: string) {
@@ -101,10 +83,7 @@ export class Dashboard implements OnInit {
 
     if (!confirmation) return;
 
-    this.dashboardService
-      .delete(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    await this.store.delete(id);
   }
 
   openConnect(): void {
@@ -128,61 +107,30 @@ export class Dashboard implements OnInit {
     });
   }
 
-  async createServer(payload: CreateServerForm) {
-    const toastId = this.toastService.show('loading', 'Creating server...');
+  async locatePath(serverId: string) {
+    const updated = await this.store.updatePath(serverId);
+    if (!updated) return;
 
-    try {
-      await firstValueFrom(this.dashboardService.create(payload));
-      this.toastService.show('success', 'Server created!', {
-        autoCloseMs: 3000,
-      });
-    } catch {
-      this.toastService.show('error', 'Failed to create server.', {
-        autoCloseMs: 4000,
-      });
-    } finally {
-      this.toastService.dismiss(toastId);
-    }
-  }
-
-  locatePath(serverId: string): void {
-    this.dashboardService
-      .updatePath(serverId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (path) =>
-          this.searchModel.update((model) => ({
-            ...model,
-            path: path.serverDirectory,
-            serverId: serverId,
-          })),
-        error: (error) =>
-          console.error('Failed to select/update folder:', error),
-      });
+    this.searchModel.update((model) => ({
+      ...model,
+      path: updated.serverDirectory,
+      serverId,
+    }));
   }
 
   navToTerminal(serverId: string): void {
     this.router.navigateByUrl(`/servers/${serverId}/console`);
   }
 
-  startServer(id: string): void {
-    this.dashboardService
-      .start(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(console.log);
+  startServer(id: string) {
+    this.store.start(id);
   }
 
   stopServer(id: string): void {
-    this.dashboardService
-      .stop(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.store.stop(id);
   }
 
   restartServer(id: string) {
-    this.dashboardService
-      .restart(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.store.restart(id);
   }
 }

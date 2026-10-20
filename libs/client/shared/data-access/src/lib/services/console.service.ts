@@ -1,6 +1,6 @@
 import { inject, Service, signal } from '@angular/core';
 import { SocketService } from './socket.service';
-import { ConsoleInfoEvent, ServerSocketEvent } from '@game-server/shared/types';
+import { ServerSocketEvent } from '@game-server/shared/types';
 
 export interface ConsoleLine {
   consoleType: ServerSocketEvent['type'];
