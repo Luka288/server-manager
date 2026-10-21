@@ -1,7 +1,6 @@
 import {
   Component,
   computed,
-  DestroyRef,
   effect,
   inject,
   signal,
@@ -10,26 +9,27 @@ import {
 import { form, FormField, required } from '@angular/forms/signals';
 import { ConsoleService } from '@game-server/client/shared';
 import { ActivatedRoute } from '@angular/router';
-import { DashboardService } from '@game-server/dashboard-data-access';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { DashboardStore } from '@game-server/dashboard-data-access';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ScrollDirective } from '@game-server/directives';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { map } from 'rxjs';
 
 @Component({
   selector: 'lib-client-terminal',
-  imports: [FormField, ScrollDirective],
+  imports: [FormField, ScrollDirective, ScrollingModule],
   templateUrl: './terminal.html',
   styleUrl: './terminal.scss',
 })
 export class ClientTerminal {
   private readonly route = inject(ActivatedRoute);
   private readonly consoleService = inject(ConsoleService);
-  readonly dashboardService = inject(DashboardService);
-  private readonly destroyRef = inject(DestroyRef);
+  readonly dashboardStore = inject(DashboardStore);
 
-  readonly logClass = logClass;
+  readonly lineHeight = 27;
+  trackByIndex = (i: number) => i;
 
-  // TODO: INFINITY SCROLL FOR TERMINAL CONTENT
+  // TODO: INFINITY SCROLL NEEDS CORRECTIONS
 
   readonly terminalModel = signal({ command: '' });
   readonly terminalForm = form(this.terminalModel, (path) => {
@@ -41,28 +41,26 @@ export class ClientTerminal {
     { initialValue: null },
   );
 
-  readonly serverList = this.dashboardService.serverList;
-
-  readonly server = computed(() => {
-    return this.dashboardService
-      .serverList()
-      .find((s) => s.id === this.serverId());
-  });
-
-  readonly serverStatus = computed(() => {
-    return this.server()?.status;
-  });
+  readonly serverList = this.dashboardStore.servers;
 
   readonly terminalLines = computed(() => {
     const id = this.serverId();
     return id ? (this.consoleService.linesRecord()[id] ?? []) : [];
   });
 
+  readonly busy = computed(() => {
+    const id = this.serverId();
+    return !!id && this.dashboardStore.busyIds().includes(id);
+  });
+
+  readonly server = computed(() => {
+    return this.dashboardStore.servers().find((s) => s.id === this.serverId());
+  });
+
+  readonly serverStatus = computed(() => this.server()?.status);
+
   constructor() {
-    this.dashboardService
-      .getServerList()
-      .pipe(takeUntilDestroyed())
-      .subscribe();
+    if (this.dashboardStore.servers().length === 0) this.dashboardStore.load();
 
     effect((onCleanup) => {
       const id = this.serverId();
@@ -74,41 +72,31 @@ export class ClientTerminal {
   }
 
   startServer(id: string) {
-    this.dashboardService
-      .start(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.dashboardStore.start(id);
   }
 
   stopServer(id: string) {
-    this.dashboardService
-      .stop(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.dashboardStore.stop(id);
   }
 
   restartServer(id: string) {
-    this.dashboardService
-      .restart(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+    this.dashboardStore.restart(id);
   }
 
   onSubmit(): void {
-    if (this.terminalForm().valid()) {
-      this.consoleService.send(String(this.terminalModel().command));
-
-      this.terminalModel.update((m) => ({ ...m, command: '' }));
+    if (this.terminalForm().invalid()) {
+      return;
     }
+
+    let command = this.terminalModel().command.trim();
+    if (!command) return;
+
+    if (!command.startsWith('/')) {
+      command = '/' + command;
+    }
+
+    this.consoleService.send(String(this.terminalModel().command));
+
+    this.terminalModel.update((m) => ({ ...m, command: '' }));
   }
-}
-
-export function logClass(
-  text: string,
-): 'log-info' | 'log-warning' | 'log-error' {
-  const t = text.toLowerCase();
-
-  if (/\/error|\[error]|^error:|exception|fatal/.test(t)) return 'log-error';
-  if (/\/warn|\[warn]|^warning:|warn:/.test(t)) return 'log-warning';
-  return 'log-info';
 }

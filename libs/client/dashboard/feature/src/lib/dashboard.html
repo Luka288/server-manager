@@ -97,14 +97,21 @@
               <i class="ti ti-folder"></i>
               Update server directory
             </button>
+            }@else if (server.status === 'starting') {
+            <button
+              class="btn-stop"
+              [disabled]="store.busyIds().includes(server.id)"
+              (click)="stopServer(server.id); $event.stopPropagation()"
+            >
+              {{ 'Stop' }}
+            </button>
             } @else {
             <button
               class="btn-start"
               [disabled]="store.busyIds().includes(server.id)"
               (click)="startServer(server.id); $event.stopPropagation()"
             >
-              {{ store.busyIds().includes(server.id) ? 'Starting...' : 'Start'
-              }}
+              {{'Start' }}
             </button>
 
             <button
@@ -112,8 +119,7 @@
               [disabled]="store.busyIds().includes(server.id)"
               (click)="deleteServer(server.id); $event.stopPropagation()"
             >
-              {{ store.busyIds().includes(server.id) ? 'Deleting...' : 'Delete'
-              }}
+              {{ 'Delete' }}
             </button>
             }
           </td>
