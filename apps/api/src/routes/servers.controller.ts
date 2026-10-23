@@ -34,9 +34,10 @@ function parseCreateBody(body: any): CreateServerInput {
   if (
     typeof memoryMb !== 'number' ||
     !Number.isFinite(memoryMb) ||
-    memoryMb <= 0
+    memoryMb <= 0 ||
+    !Number.isInteger(memoryMb)
   ) {
-    throw HttpError.badRequest('memoryMb must be a positive number');
+    throw HttpError.badRequest('memoryMb must be a positive integer');
   }
 
   return {
