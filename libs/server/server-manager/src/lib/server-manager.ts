@@ -107,13 +107,13 @@ export class ServerManager extends EventEmitter {
     });
   }
 
-  stop(): void {
-    if (!this.isRunning() && !this.isStarting()) {
-      throw new Error('Server is not running');
-    }
+  // stop(): void {
+  //   if (!this.isRunning() && !this.isStarting()) {
+  //     throw new Error('Server is not running');
+  //   }
 
-    this.requestStop();
-  }
+  //   this.requestStop();
+  // }
 
   restart(): void {
     if (

@@ -23,7 +23,7 @@ export interface FolderSearchModel {
 
 @Component({
   selector: 'lib-dashboard',
-  imports: [ReactiveFormsModule, InfoContainer],
+  imports: [ReactiveFormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
