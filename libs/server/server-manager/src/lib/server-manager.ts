@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events';
 import { ServerManagerOptions } from './types';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { ServerStatus } from '@game-server/shared/types';
+import type { ServerType } from '@game-server/shared/types';
 import { Socket } from 'node:dgram';
 
 /* ServerManager class extends to the EventEmitter because whenever
@@ -174,6 +175,10 @@ export class ServerManager extends EventEmitter {
 
   getName(): string {
     return this.serverManagerOptions.name;
+  }
+
+  getType(): ServerType {
+    return this.serverManagerOptions.type ?? 'vanilla';
   }
 
   // this must be Desktop at default

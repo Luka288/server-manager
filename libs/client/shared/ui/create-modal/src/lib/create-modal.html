@@ -49,6 +49,16 @@
         </div>
 
         <div class="form-group">
+          <lib-dropdown
+            [label]="'Server type'"
+            [id]="'server-type'"
+            [FormField]="serverForm.type"
+            [options]="serverTypes"
+            (change)="onServerTypeChange()"
+          />
+        </div>
+
+        <div class="form-group">
           <label for="directory">Server Directory (location)</label>
 
           <button

@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { CreateServerForm } from '@game-server/client/types';
+import { CreateServerForm, ServerType } from '@game-server/client/types';
 import { MatDialogRef } from '@angular/material/dialog';
 import { form, FormField, required } from '@angular/forms/signals';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Dropdown } from '@game-server/client/shared/ui/dropdown';
 import { FolderService, VersionsService } from '@game-server/client/shared';
-import { tap } from 'rxjs';
+import { distinctUntilChanged, map, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-client-create-modal',
@@ -22,6 +22,7 @@ export class CreateModal {
   readonly serverFormModel = signal<CreateServerForm>({
     name: '', // done
     memoryMb: 4096, // done
+    type: 'vanilla', //! inprogress
     version: '', // done
     gamemode: 'survival', // done
     difficulty: 'normal', // done
@@ -42,12 +43,17 @@ export class CreateModal {
   // must move as export consts
   readonly gamemodeOptions = ['survival', 'creative', 'adventure', 'spectator'];
   readonly maxPlayersOptions = ['5', '10', '20', '50', '100'];
+  readonly serverTypes: ServerType[] = ['vanilla', 'fabric'];
   readonly booleans = [true, false];
 
-  // must be changed to gameVersions signal to avoid spamming requests
-  readonly gameVersions = toSignal(this.versionsService.getServerVersions(), {
-    initialValue: [],
-  });
+  readonly gameVersions = toSignal(
+    toObservable(this.serverFormModel).pipe(
+      map((model) => model.type),
+      distinctUntilChanged(),
+      switchMap((type) => this.versionsService.getServerVersions(type)),
+    ),
+    { initialValue: [] },
+  );
 
   close() {
     this.dialog.close();
@@ -59,6 +65,10 @@ export class CreateModal {
     }
 
     this.dialog.close(this.serverFormModel());
+  }
+
+  onServerTypeChange(): void {
+    this.serverFormModel.update((model) => ({ ...model, version: '' }));
   }
 
   locatePath() {

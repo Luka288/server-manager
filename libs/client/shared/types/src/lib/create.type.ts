@@ -1,6 +1,11 @@
+import type { ServerType } from '@game-server/shared/types';
+
+export type { ServerType };
+
 export interface CreateServerForm {
   name: string;
   memoryMb: number;
+  type: ServerType;
   version: string;
 
   gamemode: Gamemode;

@@ -6,6 +6,7 @@ import {
   provisionMinecraftJar,
   writeServerProperties,
 } from '@game-server/command-builder';
+import { providers, isServerType } from '../lib/providers';
 import { getPublicIp, getServerPort } from './../lib/public-ip';
 import { tryClosePort, tryOpenPort } from './../lib/port-forwarding';
 import { HttpError } from './../lib/http-error';
@@ -22,8 +23,6 @@ import type {
   ServerManager,
 } from './server.types';
 import path from 'node:path';
-
-const DEFAULT_JAR_FILE = 'server.jar';
 
 const CONNECT_NOTE =
   'Share this address with friends. If they cannot connect, you may need to enable port forwarding for this port on your router.';
@@ -44,6 +43,10 @@ export class ServersService {
     return this.getManager(id).getStatus();
   }
 
+  getType(id: string) {
+    return this.getManager(id).getType();
+  }
+
   async getConnectionInfo(id: string) {
     const manager = this.getManager(id);
     const row = await this.getRow(id);
@@ -62,6 +65,7 @@ export class ServersService {
       connectAddress: `${ip}:${port}`,
       localAddress: localIp ? `${localIp}:${port}` : null,
       note: CONNECT_NOTE,
+      type: manager.getType(),
     };
   }
 
@@ -71,7 +75,7 @@ export class ServersService {
       memoryMb,
       version,
       serverDirectory,
-      jarFile = DEFAULT_JAR_FILE,
+      type = 'vanilla',
       ...properties
     } = input;
 
@@ -79,8 +83,20 @@ export class ServersService {
       throw HttpError.badRequest('version is required');
     }
 
+    if (!isServerType(type)) {
+      throw HttpError.badRequest(`Unknown server type "${type}"`);
+    }
+    const provider = providers[type];
+    const jarFile = provider.jarFileName;
+
+    const supportedVersions = await provider.listVersions();
+    if (!supportedVersions.includes(version)) {
+      throw HttpError.badRequest(
+        `${type} does not support Minecraft ${version}`,
+      );
+    }
+
     const id = randomUUID();
-    // changed folder naming from UUID to actual servers name with servers UUID first letters
     const directory = path.join(serverDirectory, toFolderName(name, id));
 
     const command = buildMinecraftCommand({
@@ -96,11 +112,10 @@ export class ServersService {
 
     try {
       await createOwnedServerDirectory(directory, id);
-
       directoryCreated = true;
 
       writeServerProperties(directory, properties);
-      await this.provisionJar(version, path.join(directory, jarFile));
+      await provider.provision(version, path.join(directory, jarFile));
 
       await serversRepository.insert({
         id,
@@ -109,11 +124,12 @@ export class ServersService {
         jarFile,
         serverDirectory: directory,
         version,
+        // type,  // uncomment once the `type` column exists in the schema
         status: 'stopped',
       });
       databaseInserted = true;
 
-      const server = this.registry.create(id, { ...command, name });
+      const server = this.registry.create(id, { ...command, name, type });
       registryCreated = true;
 
       this.onServerCreated?.(id, server);
@@ -175,7 +191,7 @@ export class ServersService {
       await serversRepository.update(id, { initialized: true });
     }
 
-    return { id, status: manager.getStatus() };
+    return { id, status: manager.getStatus(), type: manager.getType() };
   }
 
   async stop(id: string) {
@@ -186,7 +202,7 @@ export class ServersService {
 
     await tryClosePort(id, getServerPort(row.serverDirectory));
 
-    return { id, status: manager.getStatus() };
+    return { id, status: manager.getStatus(), type: manager.getType() };
   }
 
   restart(id: string) {
@@ -194,7 +210,7 @@ export class ServersService {
 
     asConflict(() => manager.restart());
 
-    return { id, status: manager.getStatus() };
+    return { id, status: manager.getStatus(), type: manager.getType() };
   }
 
   async remove(id: string) {
@@ -260,6 +276,7 @@ function toSummary(id: string, manager: ServerManager) {
     name: manager.getName(),
     status: manager.getStatus(),
     serverDirectory: manager.getDirectory(),
+    type: manager.getType(),
   };
 }
 

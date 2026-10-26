@@ -1,5 +1,6 @@
 import type { ServerRegistry } from '@game-server/server-manager';
 import type { writeServerProperties } from '@game-server/command-builder';
+import type { ServerType } from '../lib/providers';
 
 export type ServerManager = ReturnType<ServerRegistry['create']>;
 
@@ -17,4 +18,5 @@ export type CreateServerInput = {
   jarFile?: string;
   version?: string;
   serverDirectory?: string;
+  type?: ServerType;
 } & ServerPropertiesInput;

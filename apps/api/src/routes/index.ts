@@ -3,7 +3,13 @@ import type { ServerRegistry } from '@game-server/server-manager';
 import { asyncHandler } from './../lib/async-handler';
 import { createServersController } from './servers.controller';
 import { ServersService } from './server.service';
+import * as path from 'node:path';
+import * as os from 'node:os';
 import type { OnServerCreated } from './server.types';
+import {
+  fetchFabricGameVersions,
+  provisionFabricJar,
+} from '@game-server/command-builder';
 
 export function createServerRoutes(
   registry: ServerRegistry,
@@ -28,5 +34,24 @@ export function createServerRoutes(
   router.post('/:id/restart', asyncHandler(controller.restart));
   router.delete('/:id/delete', asyncHandler(controller.remove));
 
+  // TEST ENDPOINTS
+  router.get(
+    '/fabric/versions',
+    asyncHandler(async (_req, res) => {
+      res.json(await fetchFabricGameVersions());
+    }),
+  );
+
+  router.post(
+    '/fabric/test-provision',
+    asyncHandler(async (req, res) => {
+      const { version } = req.body as { version: string };
+      const dest = path.join(os.tmpdir(), 'fabric-test', version, 'server.jar');
+
+      await provisionFabricJar(version, dest, (msg) => console.log(msg));
+
+      res.json({ ok: true, path: dest });
+    }),
+  );
   return router;
 }

@@ -34,6 +34,7 @@
           <th>Status</th>
           <th>ID</th>
           <th>Directory</th>
+          <th>Server type</th>
           <th></th>
         </tr>
       </thead>
@@ -57,6 +58,7 @@
 
           <td class="muted">{{ server.id }}</td>
           <td class="muted">{{ server.serverDirectory }}</td>
+          <td class="muted">{{server.type}}</td>
 
           <td class="actions">
             @if (server.status === 'running') { @if(connection.hasValue()) {

@@ -3,8 +3,13 @@ import { ServersService } from './server.service';
 import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { provisionMinecraftJar } from '@game-server/command-builder';
+import {
+  provisionFabricJar,
+  provisionMinecraftJar,
+} from '@game-server/command-builder';
 import { serversRepository } from './server.repository';
+import { fetchReleaseVersions } from '../lib/minecraft-versions';
+import { fetchFabricGameVersions } from '@game-server/command-builder';
 
 it('cleans up when saving the server to the database fails', async () => {
   const parentDirectory = mkdtempSync(
@@ -72,7 +77,13 @@ jest.mock('@game-server/command-builder', () => ({
     name: '',
   })),
   provisionMinecraftJar: jest.fn(),
+  provisionFabricJar: jest.fn(),
+  fetchFabricGameVersions: jest.fn(),
   writeServerProperties: jest.fn(),
+}));
+
+jest.mock('../lib/minecraft-versions', () => ({
+  fetchReleaseVersions: jest.fn(),
 }));
 
 jest.mock('./server.repository', () => ({
@@ -86,6 +97,8 @@ jest.mock('./server.repository', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(fetchReleaseVersions).mockResolvedValue(['1.21']);
+  jest.mocked(fetchFabricGameVersions).mockResolvedValue(['1.21']);
 });
 
 describe('ServersService.create', () => {
@@ -123,9 +136,40 @@ describe('ServersService.create', () => {
 
       expect(server.name).toBe('Test server');
       expect(server.status).toBe('stopped');
+      expect(server.type).toBe('vanilla');
       expect(serversRepository.insert).toHaveBeenCalledTimes(1);
       expect(provisionMinecraftJar).toHaveBeenCalledTimes(1);
       expect(registry.list().size).toBe(1);
+    } finally {
+      rmSync(parentDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it('creates and provisions a Fabric server when requested', async () => {
+    const parentDirectory = mkdtempSync(
+      path.join(tmpdir(), 'server-create-test-'),
+    );
+    const registry = new ServerRegistry();
+    const service = new ServersService(registry);
+
+    try {
+      const server = await service.create({
+        name: 'Fabric server',
+        memoryMb: 2048,
+        type: 'fabric',
+        version: '1.21',
+        serverDirectory: parentDirectory,
+      });
+
+      expect(server.type).toBe('fabric');
+      expect(provisionFabricJar).toHaveBeenCalledWith(
+        '1.21',
+        expect.stringContaining('fabric-server-launch.jar'),
+      );
+      expect(provisionMinecraftJar).not.toHaveBeenCalled();
+      expect(serversRepository.insert).toHaveBeenCalledWith(
+        expect.objectContaining({ jarFile: 'fabric-server-launch.jar' }),
+      );
     } finally {
       rmSync(parentDirectory, { recursive: true, force: true });
     }

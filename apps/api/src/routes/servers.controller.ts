@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { selectfolder } from '@game-server/server/selectfolder';
 import { HttpError } from './../lib/http-error';
-import { fetchReleaseVersions } from './../lib/minecraft-versions';
+import { isServerType, providers } from './../lib/providers';
 import type { ServersService } from './server.service';
 import type { CreateServerInput } from './server.types';
 
@@ -25,6 +25,7 @@ function parseCreateBody(body: any): CreateServerInput {
     onlineMode,
     worldSeed,
     serverDirectory,
+    type,
   } = body ?? {};
 
   if (typeof name !== 'string' || !name.trim()) {
@@ -40,6 +41,11 @@ function parseCreateBody(body: any): CreateServerInput {
     throw HttpError.badRequest('memoryMb must be a positive integer');
   }
 
+  const serverType = type ?? 'vanilla';
+  if (typeof serverType !== 'string' || !isServerType(serverType)) {
+    throw HttpError.badRequest(`Unknown server type "${serverType}"`);
+  }
+
   return {
     name,
     memoryMb,
@@ -52,6 +58,7 @@ function parseCreateBody(body: any): CreateServerInput {
     whitelist,
     onlineMode,
     worldSeed,
+    type: serverType,
     serverDirectory: requireString(serverDirectory, 'serverDirectory'),
   };
 }
@@ -83,10 +90,18 @@ export function createServersController(service: ServersService) {
       res.json(await service.create(parseCreateBody(req.body)));
     },
 
-    versions: async (_req: Request, res: Response) => {
+    versions: async (req: Request, res: Response) => {
       try {
-        res.json(await fetchReleaseVersions());
+        const requestedType = req.query.type ?? 'vanilla';
+        if (typeof requestedType !== 'string' || !isServerType(requestedType)) {
+          throw HttpError.badRequest(
+            `Unknown server type "${String(requestedType)}"`,
+          );
+        }
+
+        res.json(await providers[requestedType].listVersions());
       } catch (err) {
+        if (err instanceof HttpError) throw err;
         console.error('Failed to fetch Minecraft versions:', err);
         throw new HttpError(500, 'Failed to fetch Minecraft versions');
       }
@@ -97,7 +112,12 @@ export function createServersController(service: ServersService) {
     },
 
     status: (req: Request, res: Response) => {
-      res.json({ success: true, status: service.getStatus(getIdParam(req)) });
+      const id = getIdParam(req);
+      res.json({
+        success: true,
+        status: service.getStatus(id),
+        type: service.getType(id),
+      });
     },
 
     start: async (req: Request, res: Response) => {

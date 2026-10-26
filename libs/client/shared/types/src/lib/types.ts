@@ -1,3 +1,5 @@
+import type { ServerType } from '@game-server/shared/types';
+
 export type ServerStatus =
   | 'stopped'
   | 'running'
@@ -12,6 +14,7 @@ export interface Server {
   name: string;
   status: ServerStatus;
   serverDirectory: string;
+  type: ServerType;
 }
 
 export interface ServerDetail extends Server {
@@ -30,4 +33,5 @@ export interface ConnectionInfo {
   connectAddress: string;
   localAddress: string;
   note: string;
+  type: ServerType;
 }

@@ -1,3 +1,5 @@
+import type { ServerType } from '@game-server/shared/types';
+
 export type ServerStatus =
   | 'stopped'
   | 'running'
@@ -11,6 +13,7 @@ export interface ServerManagerOptions {
   args: string[];
   cwd: string;
   name: string;
+  type?: ServerType;
 }
 
 export interface ServerManagerEvents {

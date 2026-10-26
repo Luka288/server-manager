@@ -7,6 +7,8 @@ export type ServerStatus =
   | 'provisioning'
   | 'restarting';
 
+export type ServerType = 'vanilla' | 'fabric';
+
 export interface ServerStatusEvent {
   type: 'server-status';
   serverId: string;
