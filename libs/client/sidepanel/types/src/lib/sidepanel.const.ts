@@ -6,6 +6,11 @@ export const sidepanelNavigation: SidepanelInterface[] = [
     path: '/',
   },
 
+  {
+    name: 'How it works',
+    path: 'ss',
+  },
+
   // {
   //   name: 'Terminal',
   //   path: 'servers/:id/console',

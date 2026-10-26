@@ -3,7 +3,6 @@ export * from './lib/services/api.service';
 export * from './lib/services/socket.service';
 export * from './lib/services/versions.service';
 export * from './lib/services/console.service';
-export * from './lib/services/client-state.service';
 export * from './lib/services/toast.service';
 export * from './lib/services/folder.service';
 export * from './lib/services/modal.service';

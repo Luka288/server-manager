@@ -8,7 +8,7 @@
 
       <div class="terminal-actions">
         <div class="terminal-status">
-          <span class="status-dot"></span>
+          <span class="status-dot" [class]="serverStatus()"></span>
           <span [class]="serverStatus()">{{serverStatus()}}</span>
         </div>
 
@@ -43,6 +43,7 @@
         <button
           class="terminal-button start-button"
           type="button"
+          [disabled]="busy()"
           (click)="startServer(serverId()!)"
         >
           ▶
@@ -52,11 +53,20 @@
       </div>
     </header>
 
-    <div class="terminal-content" scrollDirective>
-      @for (cmd of terminalLines(); track $index) {
-      <p [class]="cmd.consoleType">{{ cmd.text }}</p>
-      }
-    </div>
+    <cdk-virtual-scroll-viewport
+      [itemSize]="lineHeight"
+      [minBufferPx]="100"
+      [maxBufferPx]="200"
+      scrollDirective
+      class="terminal-content"
+    >
+      <div
+        *cdkVirtualFor="let cmd of terminalLines(); trackBy: trackByIndex"
+        class="content"
+      >
+        <p [class]="cmd.consoleType">{{ cmd.text }}</p>
+      </div>
+    </cdk-virtual-scroll-viewport>
 
     <div class="terminal-input">
       <form (submit)="$event.preventDefault(); onSubmit()">

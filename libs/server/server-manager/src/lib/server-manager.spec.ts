@@ -9,6 +9,7 @@ describe('ServerManager', () => {
       command: 'node',
       args: [path.join(__dirname, '../../test-fixtures/dummy-process.js')],
       cwd: __dirname,
+      name: 'test server',
     });
   });
 
@@ -27,6 +28,8 @@ describe('ServerManager', () => {
 
   it('captures stdout output', (done) => {
     manager.on('stdout', (chunk) => {
+      if (!chunk.includes('Starting dummy process...')) return;
+
       expect(chunk).toContain('Starting dummy process...');
       done();
     });
@@ -98,9 +101,21 @@ describe('ServerManager', () => {
     manager.start();
   });
 
-  afterEach(() => {
-    if (manager.isRunning()) {
-      manager.stop();
-    }
+  it('waits for the process to stop during shutdown', async () => {
+    manager.start();
+
+    await new Promise<void>((resolve) => {
+      manager.once('statusChange', (status) => {
+        if (status === 'running') resolve();
+      });
+    });
+
+    await manager.shutdown(1_000);
+
+    expect(manager.getStatus()).toBe('stopped');
+  });
+
+  afterEach(async () => {
+    await manager.shutdown(1_000);
   });
 });

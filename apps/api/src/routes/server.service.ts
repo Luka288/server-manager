@@ -11,7 +11,10 @@ import { tryClosePort, tryOpenPort } from './../lib/port-forwarding';
 import { HttpError } from './../lib/http-error';
 import { serversRepository } from './server.repository';
 import { getLocalIp } from './../lib/local-ip';
-import { rm } from 'node:fs/promises';
+import {
+  createOwnedServerDirectory,
+  removeOwnedServerDirectory,
+} from './server-directory';
 
 import type {
   CreateServerInput,
@@ -19,9 +22,7 @@ import type {
   ServerManager,
 } from './server.types';
 import path from 'node:path';
-import os from 'node:os';
 
-const SERVERS_ROOT = './servers';
 const DEFAULT_JAR_FILE = 'server.jar';
 
 const CONNECT_NOTE =
@@ -74,9 +75,13 @@ export class ServersService {
       ...properties
     } = input;
 
+    if (typeof version !== 'string' || !version.trim()) {
+      throw HttpError.badRequest('version is required');
+    }
+
     const id = randomUUID();
     // changed folder naming from UUID to actual servers name with servers UUID first letters
-    const directory = path.join(serverDirectory, toFolderName(name, id)); // ! this must be user custom directory
+    const directory = path.join(serverDirectory, toFolderName(name, id));
 
     const command = buildMinecraftCommand({
       memoryMb,
@@ -85,33 +90,67 @@ export class ServersService {
       name,
     });
 
-    writeServerProperties(directory, properties);
+    let directoryCreated = false;
+    let databaseInserted = false;
+    let registryCreated = false;
 
-    const server = this.registry.create(id, { ...command, name });
+    try {
+      await createOwnedServerDirectory(directory, id);
 
-    this.onServerCreated?.(id, server);
-    attachProcessLogging(id, server);
+      directoryCreated = true;
 
-    if (version) {
-      await this.provisionJar(
+      writeServerProperties(directory, properties);
+      await this.provisionJar(version, path.join(directory, jarFile));
+
+      await serversRepository.insert({
         id,
-        server,
+        name,
+        memoryMb,
+        jarFile,
+        serverDirectory: directory,
         version,
-        path.join(directory, jarFile),
-      );
+        status: 'stopped',
+      });
+      databaseInserted = true;
+
+      const server = this.registry.create(id, { ...command, name });
+      registryCreated = true;
+
+      this.onServerCreated?.(id, server);
+      attachProcessLogging(id, server);
+
+      return toSummary(id, server);
+    } catch (error) {
+      if (registryCreated) {
+        try {
+          this.registry.delete(id);
+        } catch (cleanupError) {
+          console.error(`[${id}] registry cleanup failed:`, cleanupError);
+        }
+      }
+
+      if (databaseInserted) {
+        await serversRepository.delete(id).catch((cleanupError) => {
+          console.error(`[${id}] database cleanup failed:`, cleanupError);
+        });
+      }
+
+      if (directoryCreated) {
+        await removeOwnedServerDirectory(directory, id)
+          .then((removed) => {
+            if (!removed) {
+              console.error(
+                `[${id}] could not verify ownership during cleanup`,
+              );
+            }
+          })
+          .catch((cleanupError) => {
+            console.error(`[${id}] folder cleanup failed:`, cleanupError);
+          });
+      }
+
+      throw error;
     }
-
-    await serversRepository.insert({
-      id,
-      name,
-      memoryMb,
-      jarFile,
-      serverDirectory: directory,
-      version: version ?? null,
-      status: server.getStatus(),
-    });
-
-    return toSummary(id, server);
   }
 
   async start(id: string) {
@@ -143,7 +182,7 @@ export class ServersService {
     const manager = this.getManager(id);
     const row = await this.getRow(id);
 
-    asConflict(() => manager.stop());
+    asConflict(() => manager.shutdown());
 
     await tryClosePort(id, getServerPort(row.serverDirectory));
 
@@ -166,29 +205,17 @@ export class ServersService {
       throw new HttpError(403, 'Cannot remove a server that is not stopped');
     }
 
-    const server = await serversRepository.findById(id);
-    if (!server) throw new HttpError(404, 'Server not found');
+    const server = await this.getRow(id);
 
-    await this.deleteFromLocalMachine(server.serverDirectory);
+    const filesDeleted = await removeOwnedServerDirectory(
+      server.serverDirectory,
+      id,
+    );
 
     this.registry.delete(id);
     await serversRepository.delete(id);
 
-    return { id, deleted: true };
-  }
-
-  async deleteFromLocalMachine(dir: string) {
-    const resolved = path.resolve(dir);
-
-    if (resolved === path.parse(resolved).root || resolved === os.homedir()) {
-      throw new HttpError(400, 'Refusing to delete an unsafe directory');
-    }
-
-    return rm(resolved, {
-      recursive: true,
-      force: true,
-      maxRetries: 3,
-    });
+    return { id, deleted: true, filesDeleted };
   }
 
   async updateFolderPath(id: string, path: string) {
@@ -220,19 +247,10 @@ export class ServersService {
   }
 
   private async provisionJar(
-    id: string,
-    server: ServerManager,
     version: string,
     targetPath: string,
-  ) {
-    try {
-      await provisionMinecraftJar(version, targetPath);
-      server.markStatus('stopped');
-      console.log(`[${id}] jar provisioned successfully`);
-    } catch (err) {
-      server.markStatus('crashed');
-      console.error(`[${id}] provisioning failed: ${(err as Error).message}`);
-    }
+  ): Promise<void> {
+    await provisionMinecraftJar(version, targetPath);
   }
 }
 

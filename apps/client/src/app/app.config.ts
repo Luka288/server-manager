@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
-    provideHttpClient(withInterceptors([requestInterceptor])),
+    provideHttpClient(),
     { provide: API_CONFIG, useValue: { apiBase: environment.apiBase } },
   ],
 };

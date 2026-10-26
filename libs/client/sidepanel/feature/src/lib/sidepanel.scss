@@ -12,6 +12,7 @@ nav {
   ul {
     margin: 0;
     padding: 0;
+    @include mixin.flex($gap: 10px, $dir: column);
 
     li {
       // list-style: none;

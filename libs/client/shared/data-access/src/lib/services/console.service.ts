@@ -1,6 +1,7 @@
 import { inject, Service, signal } from '@angular/core';
 import { SocketService } from './socket.service';
-import { ConsoleInfoEvent, ServerSocketEvent } from '@game-server/shared/types';
+import { ServerSocketEvent } from '@game-server/shared/types';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface ConsoleLine {
   consoleType: ServerSocketEvent['type'];
@@ -19,7 +20,7 @@ export class ConsoleService {
   constructor() {
     this.socketService.connect();
 
-    this.socketService.events$.subscribe((event) => {
+    this.socketService.events$.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event.serverId !== this.currentServerId) {
         return;
       }
