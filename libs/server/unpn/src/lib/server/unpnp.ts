@@ -1,5 +1,7 @@
 import { Client } from '@rejetto/nat-upnp';
 
+// NOTE: Does not work because of UPNP protocol
+
 /**
  * Opens a public port mapped to the local network host via UPnP.
  * @param port Port number to open (TCP)
