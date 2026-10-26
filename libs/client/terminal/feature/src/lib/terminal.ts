@@ -95,7 +95,7 @@ export class ClientTerminal {
       command = '/' + command;
     }
 
-    this.consoleService.send(String(this.terminalModel().command));
+    this.consoleService.send(command);
 
     this.terminalModel.update((m) => ({ ...m, command: '' }));
   }

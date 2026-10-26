@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events';
 import { ServerManagerOptions } from './types';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { ServerStatus } from '@game-server/shared/types';
+import { Socket } from 'node:dgram';
 
 /* ServerManager class extends to the EventEmitter because whenever
    something changes it will automatically fire event
@@ -195,5 +196,67 @@ export class ServerManager extends EventEmitter {
 
   dispose(): void {
     this.childProcess?.kill();
+  }
+
+  shutdown(ms = 15_000): Promise<void> {
+    const child = this.childProcess;
+
+    console.log('this method is triggered');
+
+    if (!child) {
+      return Promise.resolve();
+    }
+
+    this.restartPending = false;
+    this.intentionalStop = true;
+    this.setStatus('stopping');
+
+    return new Promise<void>((resolve, reject) => {
+      const timers: ReturnType<typeof setTimeout>[] = [];
+
+      const cleanup = () => {
+        for (const timer of timers) {
+          clearTimeout(timer);
+        }
+
+        child.off('close', onClose);
+        child.off('error', onError);
+      };
+
+      const onClose = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = (err: Error) => {
+        cleanup();
+        reject(err);
+      };
+
+      child.once('close', onClose);
+      child.once('error', onError);
+
+      timers.push(
+        setTimeout(() => {
+          if (this.childProcess !== child) return;
+
+          child.kill('SIGKILL');
+
+          timers.push(
+            setTimeout(() => {
+              cleanup();
+
+              reject(
+                new Error(
+                  `Server "${this.serverManagerOptions.name}" did not stop`,
+                ),
+              );
+            }, 5000),
+          );
+        }, ms),
+      );
+
+      child.stdin?.write('stop\n');
+    });
   }
 }

@@ -53,6 +53,46 @@ async function main(): Promise<void> {
     console.log(`[ ready ] http://${host}:${port}`);
     console.log(`[ ws ] ws://${host}:${port}/ws`);
   });
+
+  let shuttingDown = false;
+
+  const shutdown = (signal: NodeJS.Signals) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
+    console.log(`Received ${signal}; shutting down...`);
+
+    const httpClosed = new Promise<void>((resolve, reject) => {
+      HttpServer.close((error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+
+    void (async () => {
+      try {
+        await serverSocket.close();
+
+        const errors = await registry.shutdownAll();
+        for (const error of errors) {
+          console.error(error.message);
+        }
+
+        if (errors.length > 0) {
+          process.exitCode = 1;
+        }
+
+        await httpClosed;
+        console.log('Shutdown complete');
+      } catch (error) {
+        console.error('Shutdown failed:', error);
+        process.exitCode = 1;
+      }
+    })();
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 main();

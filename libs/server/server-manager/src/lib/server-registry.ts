@@ -36,4 +36,22 @@ export class ServerRegistry {
   list(): Map<string, ServerManager> {
     return new Map(this.managers);
   }
+
+  async shutdownAll(): Promise<Error[]> {
+    const results = await Promise.all(
+      Array.from(this.managers.entries(), async ([id, manager]) => {
+        try {
+          await manager.shutdown();
+
+          return null;
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          return new Error(`Failed to shut down server "${id}": ${message}`);
+        }
+      }),
+    );
+
+    return results.filter((error): error is Error => error !== null);
+  }
 }

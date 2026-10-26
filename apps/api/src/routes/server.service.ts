@@ -182,7 +182,7 @@ export class ServersService {
     const manager = this.getManager(id);
     const row = await this.getRow(id);
 
-    asConflict(() => manager.stop());
+    asConflict(() => manager.shutdown());
 
     await tryClosePort(id, getServerPort(row.serverDirectory));
 

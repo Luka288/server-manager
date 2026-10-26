@@ -235,4 +235,14 @@ export class ServerSocket {
     this.history.set(serverId, list);
     this.broadcastToSubscribers(serverId, event);
   }
+
+  close(): Promise<void> {
+    for (const socket of this.wss.clients) {
+      socket.close(1001, 'Server shutting down');
+    }
+
+    return new Promise((resolve) => {
+      this.wss.close(() => resolve());
+    });
+  }
 }
