@@ -1,101 +1,105 @@
-# GameServer
+# 🎮 GameServer Manager
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A modern desktop/web application for creating, managing, and monitoring Minecraft game servers without manually editing configuration files or dealing with complicated setup procedures.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+**GameServer Manager** aims to simplify the entire server lifecycle through a clean, guided interface, making server management accessible even to users without technical experience.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## ✨ Features
 
-## Run tasks
+- **Server Creation & Provisioning** — Create and configure Minecraft server instances through a guided workflow.
+- **Lifecycle Management** — Start, stop, and restart servers from a single dashboard.
+- **Real-Time Console** — Monitor server output and logs as they happen.
+- **Live Server Updates** — Receive real-time server status and console updates through WebSockets.
+- **Configuration Management** — Manage server settings without manually editing configuration files.
+- **Directory Management** — Organize server files and directories in one place.
+- **Multiple Server Instances** — Create and manage multiple Minecraft servers simultaneously.
+- **Persistent Storage** — Store server metadata and configuration using PostgreSQL.
+- **Modular Architecture** — Built with Nx monorepo architecture for maintainability and future expansion.
 
-To run the dev server for your app, use:
+## 🎯 Why GameServer Manager?
 
-```sh
-npx nx serve client
+Setting up a Minecraft server manually often involves several repetitive steps:
+
+- Creating and organizing server directories.
+- Downloading the appropriate server JAR.
+- Accepting the EULA and configuring server properties.
+- Adjusting memory allocation and startup arguments.
+- Configuring network ports.
+- Starting and stopping server processes manually.
+- Monitoring console output and troubleshooting startup issues.
+
+GameServer Manager aims to eliminate this friction by bringing these operations together in one application.
+
+The goal is simple: **make creating and managing a Minecraft server as straightforward as possible.**
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| Angular | Frontend application |
+| TypeScript | Type-safe application development |
+| Express.js | Backend API |
+| Nx | Monorepo architecture and workspace management |
+| WebSockets | Real-time console streaming and server updates |
+| PostgreSQL | Persistent data storage |
+| Drizzle ORM | Database schema and queries |
+| Node.js | Server orchestration and process management |
+
+## 📁 Project Structure
+
+The project follows an Nx monorepo architecture to separate application interfaces, backend services, and reusable logic.
+
+```text
+game-server-manager/
+├── apps/
+│   ├── api/                # Express API and server orchestration
+│   └── client/             # Angular frontend
+├── libs/
+│   ├── server/             # Server management and lifecycle logic
+│   └── shared/             # Shared types and reusable logic
+└── ...
 ```
 
-To create a production bundle:
+The structure is designed to keep responsibilities separated and make it easier to introduce additional features and game server types in the future.
 
-```sh
-npx nx build client
-```
+## 🚀 Use Cases
 
-To see all available targets to run for a project, run:
+GameServer Manager is being developed to support workflows such as:
 
-```sh
-npx nx show project client
-```
+- Creating a new vanilla Minecraft server.
+- Provisioning servers with supported server implementations.
+- Managing multiple server instances from one dashboard.
+- Monitoring live console output without opening a separate terminal.
+- Starting, stopping, and restarting server processes.
+- Managing server configuration and directories.
+- Recovering from unexpected server crashes.
+- Simplifying server setup for users who are unfamiliar with manual configuration.
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🗺️ Project Goals
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+The long-term vision is to build a user-friendly game server management tool focused on:
 
-## Add new projects
+- **Simplicity** — Make server management accessible to non-technical users.
+- **Automation** — Reduce repetitive manual setup and configuration.
+- **Reliability** — Provide predictable server lifecycle management and useful error reporting.
+- **Real-Time Control** — Keep server status and console output synchronized with the application.
+- **Extensibility** — Establish a foundation for supporting additional server implementations and games.
+- **Usability** — Provide a clean, guided experience from server creation to ongoing management.
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+## 🚧 Current Status
 
-Use the plugin's generator to create new projects.
+GameServer Manager is an **active work-in-progress**.
 
-To generate a new application, use:
+The current development focuses on establishing the core infrastructure for:
 
-```sh
-npx nx g @nx/angular:app demo
-```
+- Server creation and provisioning.
+- Server lifecycle management.
+- Real-time console monitoring.
+- Persistent server metadata.
+- Modular frontend and backend architecture.
 
-To generate a new library, use:
+Features and supported workflows may evolve as development progresses.
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
+## 📜 License
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
-```
-
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Step 2
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
-```
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project is licensed under the [MIT License](LICENSE).
