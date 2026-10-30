@@ -7,7 +7,11 @@ export type ServerStatus =
   | 'provisioning'
   | 'restarting';
 
-export type ServerType = 'vanilla' | 'fabric';
+export type ServerType = 'vanilla' | 'fabric' | 'neoforge';
+
+export interface LaunchSpec {
+  args: string[];
+}
 
 export interface ServerStatusEvent {
   type: 'server-status';

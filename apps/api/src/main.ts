@@ -7,7 +7,6 @@ import cors from 'cors';
 import { createServer } from 'node:http';
 import { ServerSocket } from './lib/server-socket';
 import { errorHandler } from './lib/error-handler';
-import { getServerTypeForJar } from './lib/providers';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -28,15 +27,17 @@ async function main(): Promise<void> {
   for (const row of rows) {
     const command = buildMinecraftCommand({
       memoryMb: row.memoryMb,
-      jarFile: row.jarFile,
       serverDirectory: row.serverDirectory,
       name: row.name,
+      launchArgs:
+        row.launch?.args ??
+        ['-jar', row.jarFile ?? 'server.jar', 'nogui'],
     });
 
     const manager = registry.create(row.id, {
       ...command,
       name: row.name,
-      type: getServerTypeForJar(row.jarFile),
+      type: row.type,
     });
 
     serverSocket.attachManager(row.id, manager);

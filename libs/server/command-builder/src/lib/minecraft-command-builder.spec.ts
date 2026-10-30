@@ -6,7 +6,7 @@ describe('buildMinecraftCommand', () => {
     const config: MinecraftServerConfig = {
       name: 'Server name',
       memoryMb: 4096,
-      jarFile: 'server.jar',
+      launchArgs: ['-jar', 'server.jar', 'nogui'],
       serverDirectory: 'c/desktop/',
     };
 
@@ -16,6 +16,7 @@ describe('buildMinecraftCommand', () => {
       command: 'java',
       args: ['-Xmx4096M', '-Xms4096M', '-jar', 'server.jar', 'nogui'],
       cwd: 'c/desktop/',
+      name: 'Server name',
     });
   });
 });

@@ -6,13 +6,13 @@ import {
 
 export function buildMinecraftCommand(
   config: MinecraftServerConfig,
-): ServerManagerOptions {
+): Omit<ServerManagerOptions, 'type'> {
   const xmx = `-Xmx${config.memoryMb}M`;
   const xms = `-Xms${config.memoryMb}M`;
 
   return {
-    command: 'java', // for minecraft it will be java every time
-    args: [xmx, xms, '-jar', config.jarFile, 'nogui'],
+    command: 'java',
+    args: [xmx, xms, ...config.launchArgs],
     cwd: config.serverDirectory,
     name: config.name,
   };

@@ -43,7 +43,7 @@ export class CreateModal {
   // must move as export consts
   readonly gamemodeOptions = ['survival', 'creative', 'adventure', 'spectator'];
   readonly maxPlayersOptions = ['5', '10', '20', '50', '100'];
-  readonly serverTypes: ServerType[] = ['vanilla', 'fabric'];
+  readonly serverTypes: ServerType[] = ['vanilla', 'fabric', 'neoforge'];
   readonly booleans = [true, false];
 
   readonly gameVersions = toSignal(

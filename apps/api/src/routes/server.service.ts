@@ -3,7 +3,6 @@ import { existsSync } from 'node:fs';
 import type { ServerRegistry } from '@game-server/server-manager';
 import {
   buildMinecraftCommand,
-  provisionMinecraftJar,
   writeServerProperties,
 } from '@game-server/command-builder';
 import { providers, isServerType } from '../lib/providers';
@@ -87,7 +86,7 @@ export class ServersService {
       throw HttpError.badRequest(`Unknown server type "${type}"`);
     }
     const provider = providers[type];
-    const jarFile = provider.jarFileName;
+    // const jarFile = provider.jarFileName;
 
     const supportedVersions = await provider.listVersions();
     if (!supportedVersions.includes(version)) {
@@ -99,12 +98,12 @@ export class ServersService {
     const id = randomUUID();
     const directory = path.join(serverDirectory, toFolderName(name, id));
 
-    const command = buildMinecraftCommand({
-      memoryMb,
-      jarFile,
-      serverDirectory: directory,
-      name,
-    });
+    // const command = buildMinecraftCommand({
+    //   memoryMb,
+    //   jarFile,
+    //   serverDirectory: directory,
+    //   name,
+    // });
 
     let directoryCreated = false;
     let databaseInserted = false;
@@ -115,21 +114,33 @@ export class ServersService {
       directoryCreated = true;
 
       writeServerProperties(directory, properties);
-      await provider.provision(version, path.join(directory, jarFile));
+
+      const { launch, loaderVersion } = await provider.provision({
+        version,
+        directory,
+      });
+
+      const command = buildMinecraftCommand({
+        memoryMb,
+        serverDirectory: directory,
+        name,
+        launchArgs: launch.args,
+      });
 
       await serversRepository.insert({
         id,
         name,
         memoryMb,
-        jarFile,
         serverDirectory: directory,
         version,
-        // type,  // uncomment once the `type` column exists in the schema
+        type,
+        loaderVersion,
+        launch,
         status: 'stopped',
       });
       databaseInserted = true;
 
-      const server = this.registry.create(id, { ...command, name, type });
+      const server = this.registry.create(id, { ...command, type });
       registryCreated = true;
 
       this.onServerCreated?.(id, server);
@@ -260,13 +271,6 @@ export class ServersService {
     const row = await serversRepository.findById(id);
     if (!row) throw HttpError.notFound();
     return row;
-  }
-
-  private async provisionJar(
-    version: string,
-    targetPath: string,
-  ): Promise<void> {
-    await provisionMinecraftJar(version, targetPath);
   }
 }
 

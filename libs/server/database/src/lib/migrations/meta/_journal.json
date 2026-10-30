@@ -15,6 +15,20 @@
       "when": 1787051285136,
       "tag": "0001_previous_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793203598240,
+      "tag": "0002_wonderful_madrox",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793204388687,
+      "tag": "0003_add_server_type",
+      "breakpoints": true
     }
   ]
 }
